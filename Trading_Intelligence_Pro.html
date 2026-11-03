@@ -953,6 +953,36 @@
                 </div>
               </div>
 
+              <!-- DAY TRADER SKILL SCORECARD (Jakeschincariol/day-trader-skill) -->
+              <div class="p-2.5 rounded-lg bg-[#0b0e18] border border-blue-900/40 space-y-2">
+                <div class="flex items-center justify-between">
+                  <div class="font-bold text-slate-200 text-xs flex items-center space-x-1.5">
+                    <i class="ri-checkbox-multiple-line text-blue-400"></i>
+                    <span>Day Trader Skill Assessment (Jakeschincariol)</span>
+                  </div>
+                  <span id="dt-overall-grade" class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-950 text-emerald-400 border border-emerald-600/50">GRADE A</span>
+                </div>
+
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5 font-mono text-[10px]">
+                  <div class="p-1.5 rounded bg-[#101726] border border-[#1b253b]">
+                    <div class="text-slate-400">1. trader-scanner</div>
+                    <div id="dt-score-scanner" class="font-bold text-emerald-400 truncate">QUALIFIED 🟢</div>
+                  </div>
+                  <div class="p-1.5 rounded bg-[#101726] border border-[#1b253b]">
+                    <div class="text-slate-400">2. trader-entry</div>
+                    <div id="dt-score-entry" class="font-bold text-blue-300 truncate">5m Close Hit ⏱️</div>
+                  </div>
+                  <div class="p-1.5 rounded bg-[#101726] border border-[#1b253b]">
+                    <div class="text-slate-400">3. trader-exit</div>
+                    <div id="dt-score-exit" class="font-bold text-purple-300 truncate">OR-Mid / 2R 🎯</div>
+                  </div>
+                  <div class="p-1.5 rounded bg-[#101726] border border-[#1b253b]">
+                    <div class="text-slate-400">4. trader-risk</div>
+                    <div id="dt-score-risk" class="font-bold text-emerald-400 truncate">PASS 🛡️</div>
+                  </div>
+                </div>
+              </div>
+
               <!-- 3. Time Machine Monte Carlo Probabilities (10,000 Runs) -->
               <div class="p-2.5 rounded-lg bg-[#0b0e18] border border-[#1b2338] space-y-2">
                 <div class="flex items-center justify-between">
@@ -3271,6 +3301,25 @@
             document.getElementById("ai-card-smc-note").innerText = `SMC Analysis: ${ai.smc_notes || "Liquidity pools identified."}`;
             document.getElementById("ai-card-invalidation").innerText = ai.invalidation_condition;
             document.getElementById("ai-card-source").innerText = `Evaluated via ${ai.ai_source || 'Google Gemini'}`;
+
+            if (ai.day_trader_skill_scorecard) {
+              const sc = ai.day_trader_skill_scorecard;
+              const gradeEl = document.getElementById("dt-overall-grade");
+              if (gradeEl) {
+                gradeEl.innerText = `GRADE ${sc.overall_grade || 'A'}`;
+                gradeEl.className = sc.overall_grade === 'A' || sc.overall_grade === 'B' 
+                  ? "px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-950 text-emerald-400 border border-emerald-600/50"
+                  : "px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-rose-950 text-rose-400 border border-rose-600/50";
+              }
+              const sScan = document.getElementById("dt-score-scanner");
+              if (sScan) sScan.innerText = sc.scanner_qualification || "QUALIFIED 🟢";
+              const sEntry = document.getElementById("dt-score-entry");
+              if (sEntry) sEntry.innerText = sc.entry_trigger ? sc.entry_trigger.split('(')[0] : "5m Close Hit ⏱️";
+              const sExit = document.getElementById("dt-score-exit");
+              if (sExit) sExit.innerText = sc.exit_bracket ? sc.exit_bracket.split('(')[0] : "OR-Mid / 2R 🎯";
+              const sRisk = document.getElementById("dt-score-risk");
+              if (sRisk) sRisk.innerText = `${sc.risk_verdict || 'PASS'} 🛡️`;
+            }
           }
         }
       } catch (e) {

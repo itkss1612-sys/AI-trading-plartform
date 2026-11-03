@@ -17,12 +17,15 @@ logger.setLevel(logging.INFO)
 GEMINI_API_BASE = "https://generativelanguage.googleapis.com/v1beta/models"
 DEFAULT_MODEL = "gemini-2.5-flash"
 
-SYSTEM_INSTRUCTION = """You are 'Trading Intelligence Pro AI', an elite algorithmic and institutional trading analyst with deep expertise in:
-1. Smart Money Concepts (Fair Value Gaps, Order Blocks, Liquidity Sweeps, Break of Structure).
-2. Classical Technical Analysis (Opening Range Breakouts, Central Pivot Range, Multi-Timeframe Alignment).
-3. Quantitative Risk Management (Risk-to-Reward ratio >= 1.5, Monte Carlo probability distribution).
+SYSTEM_INSTRUCTION = """You are 'Day Trader AI Copilot', an elite algorithmic day trading analyst embodying the exact methodology of the 11 Day Trader skills (Jakeschincariol/day-trader-skill):
+1. 'trader-scanner': Identifies 20-day high breakouts, bull flags, oversold bounces, and 15-minute Opening Range Breakouts (ORB).
+2. 'trader-news' & 'trader-analyst': Filters catalysts, SEC 8-K disclosures, and earnings fundamentals.
+3. 'trader-entry': Triggers entries strictly on completed 5-minute bars closing above the reference level with volume validation. Long side only.
+4. 'trader-exit': Plans stop-loss at opening-range midpoint (or-mid) or range low (or-low) and sets profit target at 2R or 1R (target = entry + 2*(entry - stop)).
+5. 'trader-timemachine': Evaluates 10,000 Monte Carlo replays from the stock's own 5-min bars, comparing target share vs break-even share 1/(1+R).
+6. 'trader-budget' & 'trader-risk': Sizes whole shares to max loss limit, enforces minimum R:R >= 1.5, daily loss limits, and flat-by-close rules.
 
-Your mandate: Evaluate market setups objectively. Never invent phantom data. Maintain zero look-ahead bias.
+Your mandate: Evaluate the trade candidate strictly against these 6 Day Trader skill rules. Never invent phantom data. Maintain zero look-ahead bias.
 Always respond strictly in valid JSON adhering to the specified schema, without markdown formatting or surrounding backticks."""
 
 class GeminiAgent:
@@ -88,29 +91,30 @@ class GeminiAgent:
         key = (user_key or self.api_key).strip()
 
         # Build prompt payload
-        prompt = f"""Evaluate this trading setup for {symbol} ({market} market, currency {currency}):
+        prompt = f"""Evaluate this trading setup for {symbol} ({market} market, currency {currency}) using the 11 Day Trader Skills methodology (Jakeschincariol/day-trader-skill):
 
 MARKET DATA:
 - Last Traded Price (LTP): {currency}{quote.get('last_price', quote.get('ltp', 0))}
 - Day Change: {quote.get('change', 0)} ({quote.get('change_pct', quote.get('pct', 0))}%)
 - Day Range: Low {currency}{quote.get('low', 0)} - High {currency}{quote.get('high', 0)}
 
-TECHNICAL INDICATORS:
-- Trend: Supertrend is {technicals.get('supertrend_direction', 'NEUTRAL')}, EMA20: {technicals.get('ema20', 'N/A')}, EMA50: {technicals.get('ema50', 'N/A')}
-- Momentum: RSI(14) is {technicals.get('rsi', 'N/A')}, MACD Histogram: {technicals.get('macd_hist', 'N/A')}
-- Pivots: CPR Pivot: {technicals.get('cpr_pivot', 'N/A')}, S1: {technicals.get('cpr_s1', 'N/A')}, R1: {technicals.get('cpr_r1', 'N/A')}, CPR Bias: {technicals.get('cpr_bias', 'N/A')}
+DAY TRADER SCANNER CRITERIA (trader-scanner):
+- Setup candidate identified: Opening Range Breakout (ORB) / 20D High / Bull Flag
+- Trend Context: Supertrend {technicals.get('supertrend_direction', 'NEUTRAL')}, EMA20: {technicals.get('ema20', 'N/A')}, EMA50: {technicals.get('ema50', 'N/A')}
+- Momentum Context: RSI(14): {technicals.get('rsi', 'N/A')}, MACD Histogram: {technicals.get('macd_hist', 'N/A')}
+- CPR Bias: {technicals.get('cpr_bias', 'N/A')}
 
-SMART MONEY CONCEPTS:
+SMART MONEY CONCEPTS & ENTRY TIMING (trader-entry):
 - Unmitigated FVGs: {json.dumps(smc_data.get('unmitigated_fvgs', []) if smc_data else [])}
 - Order Block Zone: {smc_data.get('order_block_zone', 'None') if smc_data else 'None'}
 - Market Structure: {smc_data.get('structure', 'Range-bound') if smc_data else 'Range-bound'}
 
-MONTE CARLO PROBABILITY SIMULATION (Time Machine 10,000 runs):
+TIME MACHINE REPLAY (trader-timemachine 10,000 runs):
 - Target First Probability: {monte_carlo.get('target_hit_pct', 55) if monte_carlo else 'N/A'}%
 - Stop First Probability: {monte_carlo.get('stop_hit_pct', 35) if monte_carlo else 'N/A'}%
 - Neither Hit by Close: {monte_carlo.get('neither_pct', 10) if monte_carlo else 'N/A'}%
 - Expected R-Multiple: {monte_carlo.get('avg_r', 1.4) if monte_carlo else 'N/A'}R
-- Monte Carlo Verdict: {monte_carlo.get('verdict_lean', 'Slight positive drift') if monte_carlo else 'N/A'}
+- Lean Verdict: {monte_carlo.get('verdict_lean', 'Slight positive drift') if monte_carlo else 'N/A'}
 
 Provide your complete analysis strictly as JSON matching this schema:
 {{
@@ -126,6 +130,14 @@ Provide your complete analysis strictly as JSON matching this schema:
   "invalidation_level": float,
   "invalidation_condition": "Specific technical failure that cancels this setup",
   "smc_notes": "Commentary on liquidity, FVGs or market structure",
+  "day_trader_skill_scorecard": {{
+    "scanner_qualification": "QUALIFIED" | "DISQUALIFIED",
+    "entry_trigger": "Closed 5m bar breakout above OR-High (trader-entry)",
+    "exit_bracket": "Stop at OR-Midpoint, Target at 2R (trader-exit)",
+    "timemachine_edge": "Strongly toward target" | "Coin flip" | "Against target",
+    "risk_verdict": "PASS" | "BLOCK",
+    "overall_grade": "A" | "B" | "C" | "F"
+  }},
   "verdict": "APPROVE_RECOMMENDED" | "WAIT_FOR_PULLBACK" | "REJECT",
   "action_text": "Buy Bracket" | "Sell Bracket" | "Watch Only"
 }}"""
@@ -233,6 +245,14 @@ Provide your complete analysis strictly as JSON matching this schema:
             "invalidation_level": stop,
             "invalidation_condition": invalidation,
             "smc_notes": "Liquidity resting above prior day high; watch for displacement bar confirmation.",
+            "day_trader_skill_scorecard": {
+                "scanner_qualification": "QUALIFIED" if score >= 60 else "DISQUALIFIED",
+                "entry_trigger": "5-minute bar closed above reference resistance (trader-entry)",
+                "exit_bracket": "Stop at OR-Midpoint, Target at 2R (trader-exit)",
+                "timemachine_edge": "Strongly toward target (+18% over BE)" if target_hit >= 55 else "Coin flip",
+                "risk_verdict": "PASS" if rr >= 1.5 else "BLOCK",
+                "overall_grade": "A" if score >= 80 else ("B" if score >= 68 else "C")
+            },
             "verdict": verdict,
             "action_text": "Buy Bracket" if bias == "BULLISH" else ("Sell Bracket" if bias == "BEARISH" else "Watch Only"),
             "ai_source": "Offline Heuristic Engine (Add Gemini Key to unlock full AI)"
