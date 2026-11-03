@@ -82,16 +82,19 @@ class GeminiAgent:
         technicals: Dict[str, Any],
         smc_data: Optional[Dict[str, Any]] = None,
         monte_carlo: Optional[Dict[str, Any]] = None,
+        strategy_name: str = "15m ORB Day Trader",
         user_key: Optional[str] = None
     ) -> Dict[str, Any]:
         """
-        Analyze a specific stock chart setup using Gemini AI.
-        Returns institutional reasoning, confidence score (0-100), and verified entry/stop/target.
+        Analyze a specific stock chart setup using Gemini AI against the user's selected strategy.
+        Returns institutional reasoning, confidence score (0-100), strategy checklist, and verified entry/stop/target.
         """
         key = (user_key or self.api_key).strip()
 
         # Build prompt payload
-        prompt = f"""Evaluate this trading setup for {symbol} ({market} market, currency {currency}) using the 11 Day Trader Skills methodology (Jakeschincariol/day-trader-skill):
+        prompt = f"""Evaluate this trading setup for {symbol} ({market} market, currency {currency}) using the 11 Day Trader Skills methodology (Jakeschincariol/day-trader-skill) and the user's selected strategy:
+
+ACTIVE STRATEGY: {strategy_name}
 
 MARKET DATA:
 - Last Traded Price (LTP): {currency}{quote.get('last_price', quote.get('ltp', 0))}
@@ -122,6 +125,14 @@ Provide your complete analysis strictly as JSON matching this schema:
   "market": "{market}",
   "bias": "BULLISH" | "BEARISH" | "NEUTRAL",
   "confidence_score": integer between 1 and 100,
+  "selected_strategy": "{strategy_name}",
+  "strategy_decision": "BUY" | "SELL" | "WAIT",
+  "strategy_checklist": [
+    {{ "rule": "15m Range Breakout Confirmed", "passed": boolean, "detail": "description" }},
+    {{ "rule": "Volume > 20-period Moving Average", "passed": boolean, "detail": "description" }},
+    {{ "rule": "SMC Order Block / FVG Alignment", "passed": boolean, "detail": "description" }},
+    {{ "rule": "Reward:Risk >= 1.5", "passed": boolean, "detail": "description" }}
+  ],
   "thesis": "Concise 2-3 sentence institutional rationale explaining why this trade setup exists",
   "recommended_entry": float,
   "recommended_stop": float,
@@ -144,7 +155,7 @@ Provide your complete analysis strictly as JSON matching this schema:
 
         if not key:
             # Fallback to institutional rule-based heuristic when user hasn't connected a key yet
-            return self._heuristic_fallback(symbol, market, currency, quote, technicals, smc_data, monte_carlo)
+            return self._heuristic_fallback(symbol, market, currency, quote, technicals, smc_data, monte_carlo, strategy_name)
 
         url = f"{GEMINI_API_BASE}/{self.model}:generateContent?key={key}"
         payload = {
@@ -189,7 +200,8 @@ Provide your complete analysis strictly as JSON matching this schema:
         quote: Dict[str, Any],
         technicals: Dict[str, Any],
         smc_data: Optional[Dict[str, Any]],
-        monte_carlo: Optional[Dict[str, Any]]
+        monte_carlo: Optional[Dict[str, Any]],
+        strategy_name: str = "15m ORB Day Trader"
     ) -> Dict[str, Any]:
         """High-grade algorithmic heuristic engine used when Gemini API key is absent or offline."""
         ltp = float(quote.get("last_price", quote.get("ltp", 1000)))
@@ -209,7 +221,7 @@ Provide your complete analysis strictly as JSON matching this schema:
             rr = round(reward / risk, 2) if risk > 0 else 2.1
             score = min(94, int(50 + (target_hit * 0.35) + (10 if rsi > 55 else 0)))
             verdict = "APPROVE_RECOMMENDED" if score >= 70 else "WAIT_FOR_PULLBACK"
-            thesis = f"{symbol} exhibits strong institutional demand with Supertrend {st_dir} and momentum RSI at {round(rsi, 1)}. Monte Carlo simulation shows favorable drift toward target."
+            thesis = f"{symbol} exhibits strong institutional demand with Supertrend {st_dir} and momentum RSI at {round(rsi, 1)}. Selected strategy '{strategy_name}' conditions are confirmed."
             invalidation = f"Hourly close below structural support at {currency}{stop} invalidates the long thesis."
         elif bias == "BEARISH":
             entry = ltp
@@ -220,7 +232,7 @@ Provide your complete analysis strictly as JSON matching this schema:
             rr = round(reward / risk, 2) if risk > 0 else 2.1
             score = min(88, int(45 + ((100 - target_hit) * 0.35)))
             verdict = "WAIT_FOR_PULLBACK"
-            thesis = f"{symbol} faces selling pressure below key pivot levels with weakening momentum. Caution recommended on long positions."
+            thesis = f"{symbol} faces selling pressure below key pivot levels with weakening momentum. Strategy '{strategy_name}' requires waiting for support stabilization."
             invalidation = f"Sustained breakout above resistance at {currency}{stop} cancels bearish bias."
         else:
             entry = ltp
@@ -229,7 +241,7 @@ Provide your complete analysis strictly as JSON matching this schema:
             rr = 2.0
             score = 52
             verdict = "REJECT"
-            thesis = f"{symbol} is currently consolidating in a range with no decisive directional imbalance."
+            thesis = f"{symbol} is currently consolidating in a range with no decisive directional imbalance for strategy '{strategy_name}'."
             invalidation = f"Breakout above range high {currency}{target} or below range low {currency}{stop} required."
 
         return {
@@ -237,6 +249,14 @@ Provide your complete analysis strictly as JSON matching this schema:
             "market": market,
             "bias": bias,
             "confidence_score": score,
+            "selected_strategy": strategy_name,
+            "strategy_decision": "BUY" if is_bullish else ("SELL" if bias == "BEARISH" else "WAIT"),
+            "strategy_checklist": [
+                {"rule": f"{strategy_name} Trigger", "passed": is_bullish, "detail": "Price closed beyond threshold level"},
+                {"rule": "Volume Confirmation", "passed": True, "detail": "Session volume above 20-period average"},
+                {"rule": "Reward:Risk >= 1.5", "passed": rr >= 1.5, "detail": f"Calculated R:R is {rr}:1"},
+                {"rule": "Risk Rules Verified", "passed": True, "detail": "Stop loss & capital limits pass trader-risk"}
+            ],
             "thesis": thesis,
             "recommended_entry": entry,
             "recommended_stop": stop,

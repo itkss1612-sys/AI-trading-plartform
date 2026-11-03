@@ -17,6 +17,7 @@ class AnalyzeRequest(BaseModel):
     symbol: str
     market: str = "NSE"  # "NSE" or "US"
     currency: str = "₹"  # "₹" or "$"
+    strategy_name: Optional[str] = "15m ORB Day Trader"
     quote: Optional[Dict[str, Any]] = None
     technicals: Optional[Dict[str, Any]] = None
     smc_data: Optional[Dict[str, Any]] = None
@@ -94,6 +95,7 @@ def analyze_with_ai(
         technicals=technicals,
         smc_data=req.smc_data,
         monte_carlo=monte_carlo,
+        strategy_name=req.strategy_name or "15m ORB Day Trader",
         user_key=key
     )
 

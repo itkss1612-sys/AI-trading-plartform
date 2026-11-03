@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.core.database import Base, engine
-from app.api import auth, market, analysis, risk, journal, day_trader
+from app.api import auth, market, analysis, risk, journal, day_trader, tradingview
 
 # Initialize DB tables
 Base.metadata.create_all(bind=engine)
@@ -31,6 +31,7 @@ app.include_router(analysis.router, prefix=settings.API_V1_STR)
 app.include_router(risk.router, prefix=settings.API_V1_STR)
 app.include_router(journal.router, prefix=settings.API_V1_STR)
 app.include_router(day_trader.router, prefix=settings.API_V1_STR)
+app.include_router(tradingview.router, prefix=settings.API_V1_STR)
 
 @app.get("/")
 def root():
