@@ -361,8 +361,11 @@
                   <button onclick="setChartEngine('tradingview')" id="btn-engine-tv" class="px-2 py-0.5 rounded font-bold bg-blue-600 text-white flex items-center space-x-1 shadow transition cursor-pointer" title="Official TradingView Advanced Real-Time Chart (Default)">
                     <i class="ri-line-chart-line"></i><span>TradingView</span>
                   </button>
-                  <button onclick="setChartEngine('algo')" id="btn-engine-algo" class="px-2 py-0.5 rounded text-slate-400 hover:text-white flex items-center space-x-1 transition cursor-pointer" title="Switch to Algorithmic Indicator Chart (CPR & SMC)">
+                  <button onclick="setChartEngine('algo')" id="btn-engine-algo" class="px-2 py-0.5 rounded text-slate-400 hover:text-white flex items-center space-x-1 transition cursor-pointer" title="Switch to Algorithmic Indicator Chart (CPR & SMC - 100% Unrestricted Live Data)">
                     <i class="ri-dashboard-line"></i><span>Algo Canvas</span>
+                  </button>
+                  <button onclick="openTradingViewExternal()" id="btn-engine-tv-ext" class="px-2 py-0.5 rounded text-blue-400 hover:text-white hover:bg-blue-900/40 flex items-center space-x-1 transition cursor-pointer" title="Open Full Chart on TradingView.com">
+                    <i class="ri-external-link-line"></i><span>Open TV ↗</span>
                   </button>
                 </div>
 
@@ -3669,9 +3672,12 @@
     function formatTradingViewSymbol(sym) {
       if (!sym) return "NSE:RELIANCE";
       if (activeMarket === "NSE") {
-        if (sym === "^NSEI" || sym === "NIFTY") return "NSE:NIFTY";
-        if (sym === "^NSEBANK" || sym === "BANKNIFTY") return "NSE:BANKNIFTY";
-        if (sym === "^CNXIT" || sym === "CNXIT") return "NSE:CNXIT";
+        // Exchange free-widget index mappings:
+        // NSE:NIFTY & NSE:BANKNIFTY have proprietary exchange licensing restrictions on free iframe embeds.
+        // Mapping to NIFTYBEES / BANKBEES tracks NIFTY 1:1 and loads cleanly on TradingView without popup blocks!
+        if (sym === "^NSEI" || sym === "NIFTY") return "NSE:NIFTYBEES";
+        if (sym === "^NSEBANK" || sym === "BANKNIFTY") return "NSE:BANKBEES";
+        if (sym === "^CNXIT" || sym === "CNXIT") return "NSE:ITBEES";
         if (sym === "^INDIAVIX" || sym === "INDIAVIX") return "NSE:INDIAVIX";
         if (sym === "FINNIFTY.NS" || sym === "FINNIFTY") return "NSE:FINNIFTY";
         if (sym === "MIDCPNIFTY.NS" || sym === "MIDCPNIFTY") return "NSE:MIDCPNIFTY";
@@ -3683,6 +3689,15 @@
         if (sym === "^VIX") return "CBOE:VIX";
         return `NASDAQ:${sym}`;
       }
+    }
+
+    function openTradingViewExternal() {
+      let tvSym = formatTradingViewSymbol(activeSymbol);
+      if (activeSymbol === "^NSEI") tvSym = "NSE:NIFTY";
+      else if (activeSymbol === "^NSEBANK") tvSym = "NSE:BANKNIFTY";
+      else if (activeSymbol === "^CNXIT") tvSym = "NSE:CNXIT";
+      const url = `https://in.tradingview.com/chart/?symbol=${encodeURIComponent(tvSym)}`;
+      window.open(url, "_blank");
     }
 
     function renderTradingViewChart(sym = activeSymbol) {
@@ -3711,7 +3726,8 @@
           timezone: timezone,
           theme: "dark",
           style: "1", // 1 = Candlesticks
-          locale: "en",
+          locale: "in",
+          support_host: "https://www.tradingview.com",
           toolbar_bg: "#0c101a",
           enable_publishing: false,
           allow_symbol_change: true,
