@@ -29,18 +29,50 @@ US_UNIVERSE = [
 ]
 
 NSE_UNIVERSE = [
-    {"symbol": "^NSEI", "name": "NIFTY 50", "exchange": "NSE", "category": "INDEX", "sector": "Benchmark Index", "currency": "₹"},
-    {"symbol": "^NSEBANK", "name": "BANK NIFTY", "exchange": "NSE", "category": "INDEX", "sector": "Banking Index", "currency": "₹"},
-    {"symbol": "RELIANCE.NS", "name": "Reliance Industries", "exchange": "NSE", "category": "EQUITY", "sector": "Energy / Retail", "currency": "₹"},
-    {"symbol": "TCS.NS", "name": "Tata Consultancy Services", "exchange": "NSE", "category": "EQUITY", "sector": "IT Services", "currency": "₹"},
-    {"symbol": "HDFCBANK.NS", "name": "HDFC Bank Ltd", "exchange": "NSE", "category": "EQUITY", "sector": "Banking", "currency": "₹"},
-    {"symbol": "ICICIBANK.NS", "name": "ICICI Bank Ltd", "exchange": "NSE", "category": "EQUITY", "sector": "Banking", "currency": "₹"},
-    {"symbol": "INFY.NS", "name": "Infosys Ltd", "exchange": "NSE", "category": "EQUITY", "sector": "IT Services", "currency": "₹"},
-    {"symbol": "SBIN.NS", "name": "State Bank of India", "exchange": "NSE", "category": "EQUITY", "sector": "PSU Banking", "currency": "₹"},
-    {"symbol": "BHARTIARTL.NS", "name": "Bharti Airtel Ltd", "exchange": "NSE", "category": "EQUITY", "sector": "Telecom", "currency": "₹"},
-    {"symbol": "TITAN.NS", "name": "Titan Company Ltd", "exchange": "NSE", "category": "EQUITY", "sector": "Consumer Goods", "currency": "₹"},
-    {"symbol": "HAL.NS", "name": "Hindustan Aeronautics Ltd", "exchange": "NSE", "category": "EQUITY", "sector": "Defense / Aerospace", "currency": "₹"},
-    {"symbol": "LT.NS", "name": "Larsen & Toubro Ltd", "exchange": "NSE", "category": "EQUITY", "sector": "Infrastructure", "currency": "₹"}
+    # Benchmark & Sectoral Indices
+    {"symbol": "^NSEI", "name": "NIFTY 50", "exchange": "NSE", "category": "INDEX", "sector": "Benchmark Index", "currency": "₹", "cap": "INDEX"},
+    {"symbol": "^NSEBANK", "name": "BANK NIFTY", "exchange": "NSE", "category": "INDEX", "sector": "Banking Index", "currency": "₹", "cap": "INDEX"},
+    {"symbol": "MIDCPNIFTY.NS", "name": "NIFTY MIDCAP SELECT", "exchange": "NSE", "category": "INDEX", "sector": "Midcap Index", "currency": "₹", "cap": "INDEX"},
+
+    # Large Cap Equities
+    {"symbol": "RELIANCE.NS", "name": "Reliance Industries", "exchange": "NSE", "category": "EQUITY", "sector": "Energy / Retail", "currency": "₹", "cap": "LARGE"},
+    {"symbol": "TCS.NS", "name": "Tata Consultancy Services", "exchange": "NSE", "category": "EQUITY", "sector": "IT Services", "currency": "₹", "cap": "LARGE"},
+    {"symbol": "HDFCBANK.NS", "name": "HDFC Bank Ltd", "exchange": "NSE", "category": "EQUITY", "sector": "Private Banking", "currency": "₹", "cap": "LARGE"},
+    {"symbol": "ICICIBANK.NS", "name": "ICICI Bank Ltd", "exchange": "NSE", "category": "EQUITY", "sector": "Private Banking", "currency": "₹", "cap": "LARGE"},
+    {"symbol": "INFY.NS", "name": "Infosys Ltd", "exchange": "NSE", "category": "EQUITY", "sector": "IT Services", "currency": "₹", "cap": "LARGE"},
+    {"symbol": "SBIN.NS", "name": "State Bank of India", "exchange": "NSE", "category": "EQUITY", "sector": "PSU Banking", "currency": "₹", "cap": "LARGE"},
+    {"symbol": "BHARTIARTL.NS", "name": "Bharti Airtel Ltd", "exchange": "NSE", "category": "EQUITY", "sector": "Telecom", "currency": "₹", "cap": "LARGE"},
+    {"symbol": "TITAN.NS", "name": "Titan Company Ltd", "exchange": "NSE", "category": "EQUITY", "sector": "Consumer Goods", "currency": "₹", "cap": "LARGE"},
+    {"symbol": "LT.NS", "name": "Larsen & Toubro Ltd", "exchange": "NSE", "category": "EQUITY", "sector": "Infrastructure", "currency": "₹", "cap": "LARGE"},
+
+    # Mid Cap Leaders
+    {"symbol": "SUZLON.NS", "name": "Suzlon Energy Ltd", "exchange": "NSE", "category": "EQUITY", "sector": "Green Energy", "currency": "₹", "cap": "MID"},
+    {"symbol": "DIXON.NS", "name": "Dixon Technologies", "exchange": "NSE", "category": "EQUITY", "sector": "Electronics Mfg", "currency": "₹", "cap": "MID"},
+    {"symbol": "MAZDOCK.NS", "name": "Mazagon Dock Shipbuilders", "exchange": "NSE", "category": "EQUITY", "sector": "Defense / Naval", "currency": "₹", "cap": "MID"},
+    {"symbol": "HAL.NS", "name": "Hindustan Aeronautics Ltd", "exchange": "NSE", "category": "EQUITY", "sector": "Defense / Aerospace", "currency": "₹", "cap": "MID"},
+    {"symbol": "BEL.NS", "name": "Bharat Electronics Ltd", "exchange": "NSE", "category": "EQUITY", "sector": "Defense Electronics", "currency": "₹", "cap": "MID"},
+    {"symbol": "POLYCAB.NS", "name": "Polycab India Ltd", "exchange": "NSE", "category": "EQUITY", "sector": "Cables & Electricals", "currency": "₹", "cap": "MID"},
+    {"symbol": "TRENT.NS", "name": "Trent Ltd (Westside/Zudio)", "exchange": "NSE", "category": "EQUITY", "sector": "Retail / Apparel", "currency": "₹", "cap": "MID"},
+    {"symbol": "BSE.NS", "name": "BSE Limited", "exchange": "NSE", "category": "EQUITY", "sector": "Capital Markets", "currency": "₹", "cap": "MID"},
+    {"symbol": "CDSL.NS", "name": "Central Depository Services", "exchange": "NSE", "category": "EQUITY", "sector": "Depository Services", "currency": "₹", "cap": "MID"},
+    {"symbol": "RVNL.NS", "name": "Rail Vikas Nigam Ltd", "exchange": "NSE", "category": "EQUITY", "sector": "Railways / Infra", "currency": "₹", "cap": "MID"},
+    {"symbol": "IREDA.NS", "name": "Indian Renewable Energy Dev", "exchange": "NSE", "category": "EQUITY", "sector": "Renewable Financing", "currency": "₹", "cap": "MID"},
+    {"symbol": "KALYANKJIL.NS", "name": "Kalyan Jewellers India", "exchange": "NSE", "category": "EQUITY", "sector": "Jewellery Retail", "currency": "₹", "cap": "MID"},
+    {"symbol": "PERSISTENT.NS", "name": "Persistent Systems Ltd", "exchange": "NSE", "category": "EQUITY", "sector": "IT / Digital", "currency": "₹", "cap": "MID"},
+    {"symbol": "COFORGE.NS", "name": "Coforge Limited", "exchange": "NSE", "category": "EQUITY", "sector": "IT Services", "currency": "₹", "cap": "MID"},
+    {"symbol": "TATAELXSI.NS", "name": "Tata Elxsi Ltd", "exchange": "NSE", "category": "EQUITY", "sector": "Design & Tech", "currency": "₹", "cap": "MID"},
+
+    # Small Cap Momentum & High Growth
+    {"symbol": "HUDCO.NS", "name": "Housing & Urban Dev Corp", "exchange": "NSE", "category": "EQUITY", "sector": "Housing Finance", "currency": "₹", "cap": "SMALL"},
+    {"symbol": "RAILTEL.NS", "name": "RailTel Corporation", "exchange": "NSE", "category": "EQUITY", "sector": "Telecom / Railways", "currency": "₹", "cap": "SMALL"},
+    {"symbol": "COCHINSHIP.NS", "name": "Cochin Shipyard Ltd", "exchange": "NSE", "category": "EQUITY", "sector": "Shipbuilding / Defense", "currency": "₹", "cap": "SMALL"},
+    {"symbol": "ANGELONE.NS", "name": "Angel One Ltd", "exchange": "NSE", "category": "EQUITY", "sector": "Fintech / Broking", "currency": "₹", "cap": "SMALL"},
+    {"symbol": "EXIDEIND.NS", "name": "Exide Industries Ltd", "exchange": "NSE", "category": "EQUITY", "sector": "Battery / EV Storage", "currency": "₹", "cap": "SMALL"},
+    {"symbol": "NBCC.NS", "name": "NBCC (India) Ltd", "exchange": "NSE", "category": "EQUITY", "sector": "Civil Construction", "currency": "₹", "cap": "SMALL"},
+    {"symbol": "CENTRALBK.NS", "name": "Central Bank of India", "exchange": "NSE", "category": "EQUITY", "sector": "PSU Banking", "currency": "₹", "cap": "SMALL"},
+    {"symbol": "APOLLOTYRE.NS", "name": "Apollo Tyres Ltd", "exchange": "NSE", "category": "EQUITY", "sector": "Tyres & Rubber", "currency": "₹", "cap": "SMALL"},
+    {"symbol": "MANAPPURAM.NS", "name": "Manappuram Finance Ltd", "exchange": "NSE", "category": "EQUITY", "sector": "Gold Loan NBFC", "currency": "₹", "cap": "SMALL"},
+    {"symbol": "DATAPATTNS.NS", "name": "Data Patterns (India) Ltd", "exchange": "NSE", "category": "EQUITY", "sector": "Defense Electronics", "currency": "₹", "cap": "SMALL"}
 ]
 
 class DayTraderBridge:
@@ -232,6 +264,7 @@ class DayTraderBridge:
                 "name": inst["name"],
                 "exchange": inst["exchange"],
                 "category": inst["category"],
+                "cap": inst.get("cap", "EQUITY"),
                 "sector": inst["sector"],
                 "currency": currency,
                 "ltp": ltp,

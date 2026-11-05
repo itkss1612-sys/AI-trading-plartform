@@ -8,12 +8,17 @@ from app.schemas.market import Candle, Quote, MarketIndexOverview, MarketOvervie
 
 IST = pytz.timezone("Asia/Kolkata")
 
-# Master database of Indian Instruments
+# Master database of Indian Instruments (Large Cap, Mid Cap, Small Cap, Indices)
 INDIAN_INSTRUMENTS = [
+    # Benchmark & Sectoral Indices
     {"symbol": "^NSEI", "name": "NIFTY 50", "exchange": "NSE", "category": "INDEX", "lot_size": 25, "tick_size": 0.05, "sector": "Benchmark"},
     {"symbol": "^NSEBANK", "name": "BANK NIFTY", "exchange": "NSE", "category": "INDEX", "lot_size": 15, "tick_size": 0.05, "sector": "Banking"},
     {"symbol": "^CNXIT", "name": "NIFTY IT", "exchange": "NSE", "category": "INDEX", "lot_size": 25, "tick_size": 0.05, "sector": "Information Technology"},
     {"symbol": "^INDIAVIX", "name": "INDIA VIX", "exchange": "NSE", "category": "VOLATILITY", "lot_size": 1, "tick_size": 0.01, "sector": "Volatility Index"},
+    {"symbol": "FINNIFTY.NS", "name": "NIFTY Financial Services", "exchange": "NSE", "category": "INDEX", "lot_size": 40, "tick_size": 0.05, "sector": "Financials"},
+    {"symbol": "MIDCPNIFTY.NS", "name": "NIFTY Midcap Select", "exchange": "NSE", "category": "INDEX", "lot_size": 75, "tick_size": 0.05, "sector": "Midcap Index"},
+
+    # Large Cap Equities
     {"symbol": "RELIANCE.NS", "name": "Reliance Industries Ltd", "exchange": "NSE", "category": "EQUITY", "lot_size": 250, "tick_size": 0.05, "sector": "Energy / Conglomerate"},
     {"symbol": "TCS.NS", "name": "Tata Consultancy Services", "exchange": "NSE", "category": "EQUITY", "lot_size": 175, "tick_size": 0.05, "sector": "IT Services"},
     {"symbol": "HDFCBANK.NS", "name": "HDFC Bank Ltd", "exchange": "NSE", "category": "EQUITY", "lot_size": 550, "tick_size": 0.05, "sector": "Private Banking"},
@@ -29,7 +34,54 @@ INDIAN_INSTRUMENTS = [
     {"symbol": "BAJFINANCE.NS", "name": "Bajaj Finance Ltd", "exchange": "NSE", "category": "EQUITY", "lot_size": 125, "tick_size": 0.05, "sector": "NBFC"},
     {"symbol": "SUNPHARMA.NS", "name": "Sun Pharmaceutical Ind", "exchange": "NSE", "category": "EQUITY", "lot_size": 350, "tick_size": 0.05, "sector": "Pharmaceuticals"},
     {"symbol": "TITAN.NS", "name": "Titan Company Ltd", "exchange": "NSE", "category": "EQUITY", "lot_size": 175, "tick_size": 0.05, "sector": "Consumer Goods"},
-    {"symbol": "AXISBANK.NS", "name": "Axis Bank Ltd", "exchange": "NSE", "category": "EQUITY", "lot_size": 625, "tick_size": 0.05, "sector": "Private Banking"}
+    {"symbol": "AXISBANK.NS", "name": "Axis Bank Ltd", "exchange": "NSE", "category": "EQUITY", "lot_size": 625, "tick_size": 0.05, "sector": "Private Banking"},
+    {"symbol": "ASIANPAINT.NS", "name": "Asian Paints Ltd", "exchange": "NSE", "category": "EQUITY", "lot_size": 200, "tick_size": 0.05, "sector": "Paints / Consumer"},
+    {"symbol": "HCLTECH.NS", "name": "HCL Technologies Ltd", "exchange": "NSE", "category": "EQUITY", "lot_size": 350, "tick_size": 0.05, "sector": "IT Services"},
+    {"symbol": "ULTRACEMCO.NS", "name": "UltraTech Cement Ltd", "exchange": "NSE", "category": "EQUITY", "lot_size": 100, "tick_size": 0.05, "sector": "Cement / Materials"},
+    {"symbol": "NTPC.NS", "name": "NTPC Ltd", "exchange": "NSE", "category": "EQUITY", "lot_size": 1500, "tick_size": 0.05, "sector": "Power Generation"},
+    {"symbol": "ONGC.NS", "name": "Oil & Natural Gas Corp", "exchange": "NSE", "category": "EQUITY", "lot_size": 2250, "tick_size": 0.05, "sector": "Oil & Gas"},
+    {"symbol": "POWERGRID.NS", "name": "Power Grid Corp of India", "exchange": "NSE", "category": "EQUITY", "lot_size": 1800, "tick_size": 0.05, "sector": "Power Transmission"},
+    {"symbol": "TATASTEEL.NS", "name": "Tata Steel Ltd", "exchange": "NSE", "category": "EQUITY", "lot_size": 5500, "tick_size": 0.05, "sector": "Metals & Mining"},
+    {"symbol": "JSWSTEEL.NS", "name": "JSW Steel Ltd", "exchange": "NSE", "category": "EQUITY", "lot_size": 675, "tick_size": 0.05, "sector": "Metals & Mining"},
+    {"symbol": "ADANIENT.NS", "name": "Adani Enterprises Ltd", "exchange": "NSE", "category": "EQUITY", "lot_size": 300, "tick_size": 0.05, "sector": "Infrastructure"},
+    {"symbol": "ADANIPORTS.NS", "name": "Adani Ports & SEZ", "exchange": "NSE", "category": "EQUITY", "lot_size": 400, "tick_size": 0.05, "sector": "Ports & Logistics"},
+    {"symbol": "COALINDIA.NS", "name": "Coal India Ltd", "exchange": "NSE", "category": "EQUITY", "lot_size": 1050, "tick_size": 0.05, "sector": "Energy / Mining"},
+    {"symbol": "WIPRO.NS", "name": "Wipro Ltd", "exchange": "NSE", "category": "EQUITY", "lot_size": 1500, "tick_size": 0.05, "sector": "IT Services"},
+    {"symbol": "TECHM.NS", "name": "Tech Mahindra Ltd", "exchange": "NSE", "category": "EQUITY", "lot_size": 600, "tick_size": 0.05, "sector": "IT Services"},
+    {"symbol": "ZOMATO.NS", "name": "Zomato Ltd", "exchange": "NSE", "category": "EQUITY", "lot_size": 2000, "tick_size": 0.05, "sector": "Consumer Internet"},
+    {"symbol": "DLF.NS", "name": "DLF Ltd", "exchange": "NSE", "category": "EQUITY", "lot_size": 825, "tick_size": 0.05, "sector": "Real Estate"},
+    {"symbol": "JIOFIN.NS", "name": "Jio Financial Services", "exchange": "NSE", "category": "EQUITY", "lot_size": 1800, "tick_size": 0.05, "sector": "Financial Services"},
+
+    # Mid Cap Equities
+    {"symbol": "SUZLON.NS", "name": "Suzlon Energy Ltd", "exchange": "NSE", "category": "EQUITY", "lot_size": 7000, "tick_size": 0.05, "sector": "Green Energy"},
+    {"symbol": "DIXON.NS", "name": "Dixon Technologies", "exchange": "NSE", "category": "EQUITY", "lot_size": 50, "tick_size": 0.05, "sector": "Electronics Mfg"},
+    {"symbol": "MAZDOCK.NS", "name": "Mazagon Dock Shipbuilders", "exchange": "NSE", "category": "EQUITY", "lot_size": 100, "tick_size": 0.05, "sector": "Defense / Naval"},
+    {"symbol": "HAL.NS", "name": "Hindustan Aeronautics Ltd", "exchange": "NSE", "category": "EQUITY", "lot_size": 150, "tick_size": 0.05, "sector": "Defense / Aerospace"},
+    {"symbol": "BEL.NS", "name": "Bharat Electronics Ltd", "exchange": "NSE", "category": "EQUITY", "lot_size": 2800, "tick_size": 0.05, "sector": "Defense Electronics"},
+    {"symbol": "POLYCAB.NS", "name": "Polycab India Ltd", "exchange": "NSE", "category": "EQUITY", "lot_size": 100, "tick_size": 0.05, "sector": "Cables & Electricals"},
+    {"symbol": "TRENT.NS", "name": "Trent Ltd (Westside/Zudio)", "exchange": "NSE", "category": "EQUITY", "lot_size": 100, "tick_size": 0.05, "sector": "Retail / Apparel"},
+    {"symbol": "BSE.NS", "name": "BSE Limited", "exchange": "NSE", "category": "EQUITY", "lot_size": 200, "tick_size": 0.05, "sector": "Capital Markets"},
+    {"symbol": "CDSL.NS", "name": "Central Depository Services", "exchange": "NSE", "category": "EQUITY", "lot_size": 250, "tick_size": 0.05, "sector": "Depository Services"},
+    {"symbol": "RVNL.NS", "name": "Rail Vikas Nigam Ltd", "exchange": "NSE", "category": "EQUITY", "lot_size": 1000, "tick_size": 0.05, "sector": "Railways / Infra"},
+    {"symbol": "IREDA.NS", "name": "Indian Renewable Energy Dev", "exchange": "NSE", "category": "EQUITY", "lot_size": 2000, "tick_size": 0.05, "sector": "Renewable Financing"},
+    {"symbol": "KALYANKJIL.NS", "name": "Kalyan Jewellers India", "exchange": "NSE", "category": "EQUITY", "lot_size": 1000, "tick_size": 0.05, "sector": "Jewellery Retail"},
+    {"symbol": "PERSISTENT.NS", "name": "Persistent Systems Ltd", "exchange": "NSE", "category": "EQUITY", "lot_size": 100, "tick_size": 0.05, "sector": "IT / Digital"},
+    {"symbol": "COFORGE.NS", "name": "Coforge Limited", "exchange": "NSE", "category": "EQUITY", "lot_size": 100, "tick_size": 0.05, "sector": "IT Services"},
+    {"symbol": "TATAELXSI.NS", "name": "Tata Elxsi Ltd", "exchange": "NSE", "category": "EQUITY", "lot_size": 100, "tick_size": 0.05, "sector": "Design & Tech"},
+
+    # Small Cap Equities
+    {"symbol": "HUDCO.NS", "name": "Housing & Urban Dev Corp", "exchange": "NSE", "category": "EQUITY", "lot_size": 1500, "tick_size": 0.05, "sector": "Housing Finance"},
+    {"symbol": "RAILTEL.NS", "name": "RailTel Corporation", "exchange": "NSE", "category": "EQUITY", "lot_size": 1000, "tick_size": 0.05, "sector": "Telecom / Railways"},
+    {"symbol": "COCHINSHIP.NS", "name": "Cochin Shipyard Ltd", "exchange": "NSE", "category": "EQUITY", "lot_size": 200, "tick_size": 0.05, "sector": "Shipbuilding / Defense"},
+    {"symbol": "ANGELONE.NS", "name": "Angel One Ltd", "exchange": "NSE", "category": "EQUITY", "lot_size": 250, "tick_size": 0.05, "sector": "Fintech / Broking"},
+    {"symbol": "EXIDEIND.NS", "name": "Exide Industries Ltd", "exchange": "NSE", "category": "EQUITY", "lot_size": 1200, "tick_size": 0.05, "sector": "Battery / EV Storage"},
+    {"symbol": "NBCC.NS", "name": "NBCC (India) Ltd", "exchange": "NSE", "category": "EQUITY", "lot_size": 3000, "tick_size": 0.05, "sector": "Construction / Infra"},
+    {"symbol": "CENTRALBK.NS", "name": "Central Bank of India", "exchange": "NSE", "category": "EQUITY", "lot_size": 3000, "tick_size": 0.05, "sector": "Public Banking"},
+    {"symbol": "APOLLOTYRE.NS", "name": "Apollo Tyres Ltd", "exchange": "NSE", "category": "EQUITY", "lot_size": 1000, "tick_size": 0.05, "sector": "Tyres / Automotive"},
+    {"symbol": "MANAPPURAM.NS", "name": "Manappuram Finance Ltd", "exchange": "NSE", "category": "EQUITY", "lot_size": 3000, "tick_size": 0.05, "sector": "Gold Loans / NBFC"},
+    {"symbol": "DATAPATTNS.NS", "name": "Data Patterns (India) Ltd", "exchange": "NSE", "category": "EQUITY", "lot_size": 150, "tick_size": 0.05, "sector": "Defense Electronics"},
+    {"symbol": "OLECTRA.NS", "name": "Olectra Greentech Ltd", "exchange": "NSE", "category": "EQUITY", "lot_size": 200, "tick_size": 0.05, "sector": "EV Commercial"},
+    {"symbol": "KEC.NS", "name": "KEC International Ltd", "exchange": "NSE", "category": "EQUITY", "lot_size": 500, "tick_size": 0.05, "sector": "T&D Infrastructure"}
 ]
 
 class MarketDataProvider:
@@ -63,7 +115,7 @@ class MarketDataProvider:
         return "EOD HISTORICAL"
 
     def get_instruments(self, query: Optional[str] = None) -> List[InstrumentItem]:
-        """Returns list of supported instruments, with optional substring search."""
+        """Returns list of supported instruments, with optional substring search. Dynamically supports any NSE stock."""
         if not query:
             return [InstrumentItem(**item) for item in INDIAN_INSTRUMENTS]
         q = query.strip().lower()
@@ -71,6 +123,19 @@ class MarketDataProvider:
             InstrumentItem(**item) for item in INDIAN_INSTRUMENTS
             if q in item["symbol"].lower() or q in item["name"].lower() or q in item["sector"].lower()
         ]
+        # Dynamic symbol resolution for any Small Cap, Mid Cap, or Large Cap NSE stock not yet hardcoded
+        if not filtered and q:
+            clean = q.upper().replace(".NS", "").replace("^", "")
+            gen_sym = f"{clean}.NS" if not q.startswith("^") else f"^{clean}"
+            filtered.append(InstrumentItem(
+                symbol=gen_sym,
+                name=f"{clean} Ltd (NSE)",
+                exchange="NSE",
+                category="INDEX" if q.startswith("^") else "EQUITY",
+                lot_size=1,
+                tick_size=0.05,
+                sector="EQUITY"
+            ))
         return filtered
 
     def fetch_ohlcv(self, symbol: str, interval: str = "1d", range_param: str = "3mo") -> pd.DataFrame:
@@ -78,6 +143,10 @@ class MarketDataProvider:
         Fetches authentic OHLCV historical bars.
         Supported intervals: 1m, 5m, 15m, 30m, 1h, 1d, 1wk.
         """
+        # Auto-normalize symbol for NSE if plain ticker provided
+        if not symbol.startswith("^") and not symbol.endswith(".NS") and not symbol.endswith(".BO") and not symbol.isupper() == False:
+            symbol = f"{symbol.strip().upper()}.NS"
+
         cache_key = f"{symbol}_{interval}_{range_param}"
         now = time.time()
         
@@ -131,9 +200,13 @@ class MarketDataProvider:
 
     def fetch_quote(self, symbol: str) -> Quote:
         """Fetches latest quote snapshot."""
+        # Auto-normalize symbol for NSE if plain ticker provided
+        if not symbol.startswith("^") and not symbol.endswith(".NS") and not symbol.endswith(".BO"):
+            symbol = f"{symbol.strip().upper()}.NS"
+
         # Find metadata
         item_meta = next((item for item in INDIAN_INSTRUMENTS if item["symbol"] == symbol), None)
-        name = item_meta["name"] if item_meta else symbol
+        name = item_meta["name"] if item_meta else symbol.replace(".NS", "") + " Ltd"
         exchange = item_meta["exchange"] if item_meta else "NSE"
 
         df = self.fetch_ohlcv(symbol, interval="1d", range_param="5d")
