@@ -81,7 +81,20 @@ INDIAN_INSTRUMENTS = [
     {"symbol": "MANAPPURAM.NS", "name": "Manappuram Finance Ltd", "exchange": "NSE", "category": "EQUITY", "lot_size": 3000, "tick_size": 0.05, "sector": "Gold Loans / NBFC"},
     {"symbol": "DATAPATTNS.NS", "name": "Data Patterns (India) Ltd", "exchange": "NSE", "category": "EQUITY", "lot_size": 150, "tick_size": 0.05, "sector": "Defense Electronics"},
     {"symbol": "OLECTRA.NS", "name": "Olectra Greentech Ltd", "exchange": "NSE", "category": "EQUITY", "lot_size": 200, "tick_size": 0.05, "sector": "EV Commercial"},
-    {"symbol": "KEC.NS", "name": "KEC International Ltd", "exchange": "NSE", "category": "EQUITY", "lot_size": 500, "tick_size": 0.05, "sector": "T&D Infrastructure"}
+    {"symbol": "KEC.NS", "name": "KEC International Ltd", "exchange": "NSE", "category": "EQUITY", "lot_size": 500, "tick_size": 0.05, "sector": "T&D Infrastructure"},
+
+    # High Volume Penny & Small Stocks (< ₹50 / < ₹100)
+    {"symbol": "IDEA.NS", "name": "Vodafone Idea Ltd", "exchange": "NSE", "category": "EQUITY", "lot_size": 10000, "tick_size": 0.01, "sector": "Telecom / Penny"},
+    {"symbol": "YESBANK.NS", "name": "Yes Bank Ltd", "exchange": "NSE", "category": "EQUITY", "lot_size": 10000, "tick_size": 0.01, "sector": "Private Banking / Penny"},
+    {"symbol": "RPOWER.NS", "name": "Reliance Power Ltd", "exchange": "NSE", "category": "EQUITY", "lot_size": 5000, "tick_size": 0.01, "sector": "Power / Penny"},
+    {"symbol": "JPPOWER.NS", "name": "Jaiprakash Power Ventures", "exchange": "NSE", "category": "EQUITY", "lot_size": 10000, "tick_size": 0.01, "sector": "Power / Penny"},
+    {"symbol": "SOUTHBANK.NS", "name": "The South Indian Bank Ltd", "exchange": "NSE", "category": "EQUITY", "lot_size": 5000, "tick_size": 0.05, "sector": "Banking / Small Cap"},
+    {"symbol": "TRIDENT.NS", "name": "Trident Ltd", "exchange": "NSE", "category": "EQUITY", "lot_size": 5000, "tick_size": 0.01, "sector": "Textiles / Penny"},
+    {"symbol": "IRFC.NS", "name": "Indian Railway Finance Corp", "exchange": "NSE", "category": "EQUITY", "lot_size": 3000, "tick_size": 0.05, "sector": "Railways / Finance"},
+    {"symbol": "GTLINFRA.NS", "name": "GTL Infrastructure Ltd", "exchange": "NSE", "category": "EQUITY", "lot_size": 10000, "tick_size": 0.01, "sector": "Telecom Infra / Penny"},
+    {"symbol": "ALOKINDS.NS", "name": "Alok Industries Ltd", "exchange": "NSE", "category": "EQUITY", "lot_size": 5000, "tick_size": 0.01, "sector": "Textiles / Penny"},
+    {"symbol": "RENUKA.NS", "name": "Shree Renuka Sugars Ltd", "exchange": "NSE", "category": "EQUITY", "lot_size": 5000, "tick_size": 0.05, "sector": "Sugar / Penny"},
+    {"symbol": "INFIBEAM.NS", "name": "Infibeam Avenues Ltd", "exchange": "NSE", "category": "EQUITY", "lot_size": 5000, "tick_size": 0.01, "sector": "Fintech / Penny"}
 ]
 
 class MarketDataProvider:

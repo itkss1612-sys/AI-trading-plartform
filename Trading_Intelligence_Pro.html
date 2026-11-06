@@ -114,8 +114,7 @@
   <!-- TradingView Official Lightweight Charts (Standalone Institutional Engine) -->
   <script src="lightweight-charts.standalone.production.js"></script>
   <script src="https://unpkg.com/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
-  <!-- TradingView Official Advanced Real-Time Charting Library -->
-  <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+  <!-- TradingView Lightweight Charts is our standalone, unrestricted charting engine (Zero external iframe popup blocks) -->
 </head>
 <body class="h-screen w-screen flex flex-col overflow-hidden text-slate-100">
 
@@ -320,9 +319,10 @@
             <div class="flex items-center justify-between pt-0.5">
               <div class="flex items-center space-x-1 flex-wrap gap-y-1">
                 <button onclick="setWatchlistFilter('ALL')" id="filter-all" class="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-blue-600 text-white transition">ALL</button>
-                <button onclick="setWatchlistFilter('LARGE')" id="filter-large" class="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-[#162033] text-slate-400 hover:text-white transition">LARGE</button>
-                <button onclick="setWatchlistFilter('MID')" id="filter-mid" class="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-[#162033] text-slate-400 hover:text-white transition">MID</button>
+                <button onclick="setWatchlistFilter('PENNY')" id="filter-penny" class="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-[#162033] text-amber-400 hover:text-amber-300 transition" title="Filter Penny & Low-Priced Stocks (< ₹50)">PENNY (&lt; ₹50)</button>
                 <button onclick="setWatchlistFilter('SMALL')" id="filter-small" class="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-[#162033] text-slate-400 hover:text-white transition">SMALL</button>
+                <button onclick="setWatchlistFilter('MID')" id="filter-mid" class="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-[#162033] text-slate-400 hover:text-white transition">MID</button>
+                <button onclick="setWatchlistFilter('LARGE')" id="filter-large" class="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-[#162033] text-slate-400 hover:text-white transition">LARGE</button>
                 <button onclick="setWatchlistFilter('INDEX')" id="filter-idx" class="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-[#162033] text-slate-400 hover:text-white transition">INDICES</button>
               </div>
               <span id="inst-count-badge" class="text-[10px] text-slate-400 font-mono font-bold">18 Stocks</span>
@@ -416,6 +416,13 @@
                 </label>
               </div>
 
+              <!-- Measurement & Ruler Tool for Any Small / Penny Stock -->
+              <div class="flex items-center space-x-1">
+                <button onclick="toggleMeasureTool()" id="btn-measure-tool" class="px-2 py-0.5 rounded font-mono text-[11px] bg-[#162033] hover:bg-[#1f2b44] text-amber-300 border border-amber-800/60 flex items-center space-x-1 transition cursor-pointer shadow-sm" title="Measure price difference, percentage, bars, and small stock profit/loss">
+                  <i class="ri-ruler-2-line text-amber-400"></i><span>Measure</span>
+                </button>
+              </div>
+
               <!-- Zoom Controls -->
               <div class="flex items-center space-x-1">
                 <button onclick="zoomChart(-15)" class="p-1 rounded bg-[#162033] text-slate-300 hover:text-white" title="Zoom In"><i class="ri-zoom-in-line"></i></button>
@@ -436,17 +443,71 @@
             </div>
 
             <!-- Chart Viewport Wrapper -->
-            <div class="relative flex-1 w-full min-h-[380px] overflow-hidden">
+            <div id="chart-viewport-wrapper" class="relative flex-1 w-full min-h-[460px] overflow-hidden select-none">
               <!-- Primary Engine: TradingView Lightweight Charts (100% Unrestricted Live Candlesticks) -->
-              <div id="tv-lightweight-chart" class="w-full h-full min-h-[380px] block"></div>
+              <div id="tv-lightweight-chart" class="w-full h-full min-h-[460px] block relative"></div>
 
               <!-- Secondary Engine: Quantitative Algorithmic Canvas (CPR, Supertrend, SMC) -->
-              <div id="algo-canvas-container" class="w-full h-full min-h-[380px] hidden relative">
+              <div id="algo-canvas-container" class="w-full h-full min-h-[460px] hidden relative">
                 <canvas id="trading-canvas" class="w-full h-full cursor-crosshair block"></canvas>
               </div>
 
-              <!-- Tertiary Engine: TradingView Web Embed (Optional) -->
-              <div id="tradingview-chart-container" class="w-full h-full min-h-[380px] hidden"></div>
+              <!-- Interactive Price Range & Measuring Tool (Ruler) Overlay -->
+              <div id="measure-overlay" class="absolute inset-0 pointer-events-none hidden z-30">
+                <canvas id="measure-canvas" class="w-full h-full block"></canvas>
+                <div id="measure-hud" class="absolute hidden bg-[#0c1222]/95 backdrop-blur-md border border-amber-500/80 rounded-lg p-2.5 text-xs font-mono text-white shadow-2xl pointer-events-auto min-w-[240px]">
+                  <div class="flex items-center justify-between border-b border-[#22304d] pb-1 mb-1.5">
+                    <span class="font-bold text-amber-400 flex items-center space-x-1">
+                      <i class="ri-ruler-2-line"></i><span>Price Measurement</span>
+                    </span>
+                    <button onclick="clearMeasurement()" class="text-slate-400 hover:text-white text-xs cursor-pointer">✕</button>
+                  </div>
+                  <div class="space-y-1 text-[11px]">
+                    <div class="flex justify-between">
+                      <span class="text-slate-400">Δ Price:</span>
+                      <span id="m-hud-price" class="font-bold text-emerald-400">+₹0.00</span>
+                    </div>
+                    <div class="flex justify-between">
+                      <span class="text-slate-400">Change %:</span>
+                      <span id="m-hud-pct" class="font-bold text-emerald-400">+0.00%</span>
+                    </div>
+                    <div class="flex justify-between">
+                      <span class="text-slate-400">Bars / Time:</span>
+                      <span id="m-hud-bars" class="text-slate-200">0 bars</span>
+                    </div>
+                    <!-- Small Stock Quick Sizing Matrix -->
+                    <div class="pt-1.5 border-t border-[#1d2942]">
+                      <div class="text-[10px] text-amber-300 font-semibold mb-0.5">Small Stock Quantity Returns:</div>
+                      <div class="grid grid-cols-2 gap-1 text-[10px]">
+                        <div class="bg-[#141b2c] p-1 rounded border border-[#202c46]">
+                          <span class="text-slate-400">1,000 Qty:</span>
+                          <span id="m-pnl-1000" class="font-bold text-emerald-400 block">+₹0</span>
+                        </div>
+                        <div class="bg-[#141b2c] p-1 rounded border border-[#202c46]">
+                          <span class="text-slate-400">5,000 Qty:</span>
+                          <span id="m-pnl-5000" class="font-bold text-emerald-400 block">+₹0</span>
+                        </div>
+                        <div class="bg-[#141b2c] p-1 rounded border border-[#202c46]">
+                          <span class="text-slate-400">10,000 Qty:</span>
+                          <span id="m-pnl-10000" class="font-bold text-emerald-400 block">+₹0</span>
+                        </div>
+                        <div class="bg-[#141b2c] p-1 rounded border border-[#202c46]">
+                          <span class="text-slate-400">25,000 Qty:</span>
+                          <span id="m-pnl-25000" class="font-bold text-emerald-400 block">+₹0</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="pt-1.5 flex space-x-1">
+                      <button onclick="applyMeasurementToPlanner()" class="flex-1 py-1 rounded bg-blue-600 hover:bg-blue-500 text-white font-bold text-[10px] text-center transition cursor-pointer">
+                        Apply to Planner
+                      </button>
+                      <button onclick="clearMeasurement()" class="px-2 py-1 rounded bg-[#1e273a] hover:bg-[#283652] text-slate-300 text-[10px] text-center transition cursor-pointer">
+                        Clear
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -547,15 +608,30 @@
             <div class="grid grid-cols-3 gap-1.5">
               <div>
                 <label class="text-slate-400 text-[10px]">Entry (&#8377;)</label>
-                <input type="number" step="0.05" id="inp-entry" value="1202" oninput="calculateRisk()" class="w-full bg-[#090d16] border border-terminal-border rounded px-1.5 py-1 text-white font-mono mt-0.5">
+                <input type="number" step="0.01" id="inp-entry" value="1202" oninput="calculateRisk()" class="w-full bg-[#090d16] border border-terminal-border rounded px-1.5 py-1 text-white font-mono mt-0.5">
               </div>
               <div>
                 <label class="text-slate-400 text-[10px]">Stop Loss (&#8377;)</label>
-                <input type="number" step="0.05" id="inp-sl" value="1180" oninput="calculateRisk()" class="w-full bg-[#090d16] border border-rose-900 rounded px-1.5 py-1 text-rose-300 font-mono mt-0.5">
+                <input type="number" step="0.01" id="inp-sl" value="1180" oninput="calculateRisk()" class="w-full bg-[#090d16] border border-rose-900 rounded px-1.5 py-1 text-rose-300 font-mono mt-0.5">
               </div>
               <div>
                 <label class="text-slate-400 text-[10px]">Target (&#8377;)</label>
-                <input type="number" step="0.05" id="inp-target" value="1250" oninput="calculateRisk()" class="w-full bg-[#090d16] border border-emerald-900 rounded px-1.5 py-1 text-emerald-300 font-mono mt-0.5">
+                <input type="number" step="0.01" id="inp-target" value="1250" oninput="calculateRisk()" class="w-full bg-[#090d16] border border-emerald-900 rounded px-1.5 py-1 text-emerald-300 font-mono mt-0.5">
+              </div>
+            </div>
+
+            <!-- Small & Penny Stock Quick Quantity Sizer -->
+            <div class="p-2 rounded bg-[#0b0f19] border border-amber-900/40 text-[10px] font-mono space-y-1">
+              <div class="flex items-center justify-between text-slate-300 font-semibold">
+                <span class="flex items-center space-x-1"><i class="ri-coins-line text-amber-400"></i><span>Small Stock Quick Sizer</span></span>
+                <span class="text-[9px] text-amber-400 font-bold" id="small-stock-tag">Quantity Preset</span>
+              </div>
+              <div class="grid grid-cols-5 gap-1">
+                <button type="button" onclick="setFixedQty(500)" class="py-1 rounded bg-[#162033] hover:bg-blue-900/60 text-slate-200 text-center border border-terminal-border cursor-pointer transition">500</button>
+                <button type="button" onclick="setFixedQty(1000)" class="py-1 rounded bg-[#162033] hover:bg-blue-900/60 text-slate-200 text-center border border-terminal-border cursor-pointer transition">1,000</button>
+                <button type="button" onclick="setFixedQty(5000)" class="py-1 rounded bg-[#162033] hover:bg-blue-900/60 text-slate-200 text-center border border-terminal-border cursor-pointer transition">5,000</button>
+                <button type="button" onclick="setFixedQty(10000)" class="py-1 rounded bg-[#162033] hover:bg-blue-900/60 text-slate-200 text-center border border-terminal-border cursor-pointer transition">10K</button>
+                <button type="button" onclick="setFixedQty(25000)" class="py-1 rounded bg-[#162033] hover:bg-blue-900/60 text-slate-200 text-center border border-terminal-border cursor-pointer transition">25K</button>
               </div>
             </div>
           </div>
@@ -1688,6 +1764,20 @@
   <script>
         // --- 1. COMPREHENSIVE NSE MASTER DIRECTORY (80+ TOP INDIAN EQUITIES & INDICES) ---
     const NSE_MASTER_DIRECTORY = [
+      // High-Volume Small & Penny Equities (< ₹50 / < ₹100)
+      { symbol: "IDEA.NS", name: "Vodafone Idea Ltd", exchange: "NSE", category: "EQUITY", cap: "PENNY", sector: "TELECOM", ltp: 12.63, change: -0.26, pct: -2.02, high: 12.84, low: 12.58, vol: "187.5M", lot: 10000 },
+      { symbol: "YESBANK.NS", name: "Yes Bank Ltd", exchange: "NSE", category: "EQUITY", cap: "PENNY", sector: "BANKING", ltp: 17.17, change: 0.93, pct: 5.73, high: 17.45, low: 16.20, vol: "94.2M", lot: 10000 },
+      { symbol: "SUZLON.NS", name: "Suzlon Energy Ltd", exchange: "NSE", category: "EQUITY", cap: "PENNY", sector: "ENERGY", ltp: 38.12, change: -0.47, pct: -1.22, high: 38.80, low: 37.90, vol: "35.1M", lot: 7000 },
+      { symbol: "RPOWER.NS", name: "Reliance Power Ltd", exchange: "NSE", category: "EQUITY", cap: "PENNY", sector: "POWER", ltp: 18.42, change: -0.28, pct: -1.50, high: 18.90, low: 18.30, vol: "22.4M", lot: 5000 },
+      { symbol: "JPPOWER.NS", name: "Jaiprakash Power Ventures", exchange: "NSE", category: "EQUITY", cap: "PENNY", sector: "POWER", ltp: 13.76, change: -0.14, pct: -1.01, high: 14.10, low: 13.65, vol: "18.3M", lot: 10000 },
+      { symbol: "SOUTHBANK.NS", name: "The South Indian Bank Ltd", exchange: "NSE", category: "EQUITY", cap: "SMALL", sector: "BANKING", ltp: 57.52, change: 1.20, pct: 2.13, high: 58.40, low: 56.10, vol: "14.6M", lot: 5000 },
+      { symbol: "TRIDENT.NS", name: "Trident Ltd", exchange: "NSE", category: "EQUITY", cap: "PENNY", sector: "CONSUMER", ltp: 23.67, change: -0.19, pct: -0.80, high: 23.79, low: 23.35, vol: "3.9M", lot: 5000 },
+      { symbol: "IRFC.NS", name: "Indian Railway Finance", exchange: "NSE", category: "EQUITY", cap: "SMALL", sector: "FINANCE", ltp: 79.14, change: -0.99, pct: -1.24, high: 79.99, low: 78.51, vol: "4.7M", lot: 3000 },
+      { symbol: "GTLINFRA.NS", name: "GTL Infrastructure Ltd", exchange: "NSE", category: "EQUITY", cap: "PENNY", sector: "TELECOM", ltp: 1.85, change: 0.05, pct: 2.78, high: 1.90, low: 1.80, vol: "45.0M", lot: 10000 },
+      { symbol: "ALOKINDS.NS", name: "Alok Industries Ltd", exchange: "NSE", category: "EQUITY", cap: "PENNY", sector: "CONSUMER", ltp: 19.40, change: -0.30, pct: -1.52, high: 19.85, low: 19.20, vol: "12.8M", lot: 5000 },
+      { symbol: "RENUKA.NS", name: "Shree Renuka Sugars Ltd", exchange: "NSE", category: "EQUITY", cap: "PENNY", sector: "CONSUMER", ltp: 34.20, change: -0.45, pct: -1.30, high: 34.90, low: 33.80, vol: "8.5M", lot: 5000 },
+      { symbol: "INFIBEAM.NS", name: "Infibeam Avenues Ltd", exchange: "NSE", category: "EQUITY", cap: "PENNY", sector: "FINANCE", ltp: 24.50, change: 0.35, pct: 1.45, high: 24.95, low: 24.10, vol: "7.1M", lot: 5000 },
+
       // Major Indices
       { symbol: "^NSEI", name: "NIFTY 50", exchange: "NSE", category: "INDEX", cap: "INDEX", sector: "Benchmark", ltp: 24687.2, change: 150.6, pct: 0.61, high: 24702.6, low: 24388.05, vol: "--", lot: 25 },
       { symbol: "^NSEBANK", name: "BANK NIFTY", exchange: "NSE", category: "INDEX", cap: "INDEX", sector: "Banking", ltp: 58251.55, change: 477.9, pct: 0.83, high: 58264.9, low: 57320.8, vol: "--", lot: 15 },
@@ -1791,6 +1881,14 @@
           const parsed = JSON.parse(stored);
           if (Array.isArray(parsed) && parsed.length > 0) {
             userWatchlist = parsed;
+            // Automatically ensure all essential small & penny stocks are present
+            DEFAULT_WATCHLIST_SYMBOLS.forEach(sym => {
+              if (!userWatchlist.some(w => w.symbol === sym)) {
+                const found = NSE_MASTER_DIRECTORY.find(m => m.symbol === sym);
+                if (found) userWatchlist.push({ ...found });
+              }
+            });
+            saveUserWatchlist();
             return;
           }
         } catch(e) {
@@ -2357,10 +2455,12 @@
           matchesC = i.category === 'INDEX' || i.cap === 'INDEX' || i.symbol.startsWith('^');
         } else if (currentFilter === 'LARGE') {
           matchesC = i.cap === 'LARGE' || (!i.cap && i.category !== 'INDEX');
+        } else if (currentFilter === 'PENNY') {
+          matchesC = i.cap === 'PENNY' || Number(i.ltp) < 50;
+        } else if (currentFilter === 'SMALL') {
+          matchesC = i.cap === 'SMALL' || (Number(i.ltp) >= 50 && Number(i.ltp) <= 500);
         } else if (currentFilter === 'MID') {
           matchesC = i.cap === 'MID';
-        } else if (currentFilter === 'SMALL') {
-          matchesC = i.cap === 'SMALL';
         } else if (currentFilter === 'EQUITY') {
           matchesC = i.category === 'EQUITY' || !i.symbol.startsWith('^');
         }
@@ -2473,9 +2573,10 @@
       const filtered = NSE_MASTER_DIRECTORY.filter(m => {
         if (masterFilter === 'ALL') return true;
         if (masterFilter === 'INDEX') return m.category === 'INDEX' || m.cap === 'INDEX' || m.symbol.startsWith('^');
+        if (masterFilter === 'PENNY') return m.cap === 'PENNY' || Number(m.ltp) < 50;
+        if (masterFilter === 'SMALL') return m.cap === 'SMALL' || (Number(m.ltp) >= 50 && Number(m.ltp) <= 500);
         if (masterFilter === 'LARGE') return m.cap === 'LARGE';
         if (masterFilter === 'MID') return m.cap === 'MID';
-        if (masterFilter === 'SMALL') return m.cap === 'SMALL';
         return m.sector === masterFilter;
       });
 
@@ -2564,7 +2665,7 @@
 
         // Instantly query true live quote from backend or Yahoo Finance
         try {
-          const res = await fetch(`/api/v1/market/quote?symbol=${encodeURIComponent(sym)}`);
+          const res = await fetch(http://127.0.0.1:8000/api/v1/market/quote?symbol=);
           if (res.ok) {
             const qData = await res.json();
             newItem.name = qData.name || newItem.name;
@@ -3723,7 +3824,6 @@
     // =========================================================================
     // TRADINGVIEW ADVANCED REAL-TIME CHARTING & STRATEGY ENGINE
     // =========================================================================
-    let activeChartEngine = "tradingview"; // "tradingview" (Default) or "algo"
     let tvWidget = null;
     let selectedStrategy = "15m ORB Day Trader";
 
@@ -3855,15 +3955,29 @@
           }
         });
 
-        // Auto-resize on window changes
+        // Auto-resize on window changes & container mutations
         window.addEventListener('resize', () => {
           if (lwChart && container) {
             lwChart.applyOptions({
-              width: container.clientWidth,
-              height: container.clientHeight
+              width: container.clientWidth || 800,
+              height: container.clientHeight || 460
             });
           }
         });
+
+        if (window.ResizeObserver && container) {
+          const ro = new ResizeObserver(entries => {
+            for (const entry of entries) {
+              if (lwChart && entry.contentRect.width > 0 && entry.contentRect.height > 0) {
+                lwChart.applyOptions({
+                  width: Math.floor(entry.contentRect.width),
+                  height: Math.floor(entry.contentRect.height)
+                });
+              }
+            }
+          });
+          ro.observe(container);
+        }
       }
 
       // Fetch authentic OHLCV bars from FastAPI backend
@@ -3940,6 +4054,7 @@
       }
 
       lwCandleSeries.setData(formattedCandles);
+      lastRenderedCandles = formattedCandles;
       lwVolumeSeries.setData(formattedVolumes);
       lwSma20Series.setData(sma20);
       lwSma50Series.setData(sma50);
@@ -3957,6 +4072,252 @@
         hudChg.innerText = `${chg >= 0 ? '+' : ''}${chg.toFixed(2)}%`;
         hudChg.className = `font-bold ${chg >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
       }
+    }
+
+    
+    // =========================================================================
+    // INTERACTIVE MEASURING TOOL (RULER) FOR ANY STOCK (SMALL / PENNY / LARGE)
+    // =========================================================================
+    let isMeasureToolActive = false;
+    let measureStartPoint = null;
+    let measureCurrentPoint = null;
+    let isMeasureDragging = false;
+    let lastRenderedCandles = [];
+
+    function toggleMeasureTool() {
+      isMeasureToolActive = !isMeasureToolActive;
+      const btn = document.getElementById("btn-measure-tool");
+      const overlay = document.getElementById("measure-overlay");
+      
+      if (isMeasureToolActive) {
+        if (btn) btn.className = "px-2 py-0.5 rounded font-mono text-[11px] bg-amber-500 text-black font-bold flex items-center space-x-1 transition cursor-pointer shadow-lg";
+        if (overlay) {
+          overlay.classList.remove("hidden");
+          overlay.style.pointerEvents = "auto";
+          overlay.style.cursor = "crosshair";
+        }
+        setupMeasureCanvas();
+      } else {
+        if (btn) btn.className = "px-2 py-0.5 rounded font-mono text-[11px] bg-[#162033] hover:bg-[#1f2b44] text-amber-300 border border-amber-800/60 flex items-center space-x-1 transition cursor-pointer shadow-sm";
+        if (overlay) {
+          overlay.classList.add("hidden");
+          overlay.style.pointerEvents = "none";
+        }
+        clearMeasurement();
+      }
+    }
+
+    function setupMeasureCanvas() {
+      const container = document.getElementById("chart-viewport-wrapper");
+      const canvas = document.getElementById("measure-canvas");
+      if (!container || !canvas) return;
+
+      canvas.width = container.clientWidth || 800;
+      canvas.height = container.clientHeight || 460;
+
+      canvas.onmousedown = (e) => {
+        const rect = canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        
+        let startPrice = 0;
+        if (lwCandleSeries) {
+          try {
+            startPrice = lwCandleSeries.coordinateToPrice(y) || 0;
+          } catch(err) {}
+        }
+        if (!startPrice && lastRenderedCandles.length > 0) {
+          startPrice = lastRenderedCandles[lastRenderedCandles.length - 1].close;
+        }
+
+        measureStartPoint = { x, y, price: startPrice };
+        measureCurrentPoint = { x, y, price: startPrice };
+        isMeasureDragging = true;
+        drawMeasurement();
+      };
+
+      canvas.onmousemove = (e) => {
+        if (!isMeasureDragging || !measureStartPoint) return;
+        const rect = canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+
+        let curPrice = 0;
+        if (lwCandleSeries) {
+          try {
+            curPrice = lwCandleSeries.coordinateToPrice(y) || 0;
+          } catch(err) {}
+        }
+        if (!curPrice && measureStartPoint.price) {
+          const deltaY = measureStartPoint.y - y;
+          curPrice = measureStartPoint.price * (1 + (deltaY / 300));
+        }
+
+        measureCurrentPoint = { x, y, price: curPrice };
+        drawMeasurement();
+      };
+
+      canvas.onmouseup = () => {
+        isMeasureDragging = false;
+      };
+
+      window.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && isMeasureToolActive) {
+          toggleMeasureTool();
+        }
+      });
+    }
+
+    function drawMeasurement() {
+      const canvas = document.getElementById("measure-canvas");
+      const hud = document.getElementById("measure-hud");
+      if (!canvas || !measureStartPoint || !measureCurrentPoint) return;
+
+      const ctx = canvas.getContext("2d");
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      const x1 = measureStartPoint.x;
+      const y1 = measureStartPoint.y;
+      const x2 = measureCurrentPoint.x;
+      const y2 = measureCurrentPoint.y;
+
+      const p1 = measureStartPoint.price;
+      const p2 = measureCurrentPoint.price;
+      const deltaPrice = p2 - p1;
+      const pct = p1 !== 0 ? (deltaPrice / p1) * 100 : 0;
+      const isUp = deltaPrice >= 0;
+
+      // Draw semi-transparent box
+      ctx.fillStyle = isUp ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)';
+      ctx.fillRect(Math.min(x1, x2), Math.min(y1, y2), Math.abs(x2 - x1), Math.abs(y2 - y1));
+
+      // Draw dashed border
+      ctx.strokeStyle = isUp ? '#10b981' : '#ef4444';
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([4, 3]);
+      ctx.strokeRect(Math.min(x1, x2), Math.min(y1, y2), Math.abs(x2 - x1), Math.abs(y2 - y1));
+
+      // Draw measurement diagonal / line
+      ctx.beginPath();
+      ctx.moveTo(x1, y1);
+      ctx.lineTo(x2, y2);
+      ctx.strokeStyle = isUp ? '#34d399' : '#f87171';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([]);
+      ctx.stroke();
+
+      // Estimate number of bars based on horizontal pixel span
+      const estBarWidth = 14;
+      const barSpan = Math.max(1, Math.round(Math.abs(x2 - x1) / estBarWidth));
+
+      // Update HUD values
+      if (hud) {
+        hud.classList.remove("hidden");
+        const priceEl = document.getElementById("m-hud-price");
+        const pctEl = document.getElementById("m-hud-pct");
+        const barsEl = document.getElementById("m-hud-bars");
+
+        if (priceEl) {
+          priceEl.innerText = `${isUp ? '+' : ''}₹${deltaPrice.toFixed(2)}`;
+          priceEl.className = `font-bold ${isUp ? 'text-emerald-400' : 'text-rose-400'}`;
+        }
+        if (pctEl) {
+          pctEl.innerText = `${isUp ? '+' : ''}${pct.toFixed(2)}%`;
+          pctEl.className = `font-bold ${isUp ? 'text-emerald-400' : 'text-rose-400'}`;
+        }
+        if (barsEl) {
+          barsEl.innerText = `${barSpan} bars (~${barSpan * 5}m)`;
+        }
+
+        // Small Stock Quantity Matrix P&L
+        const p1000 = document.getElementById("m-pnl-1000");
+        const p5000 = document.getElementById("m-pnl-5000");
+        const p10000 = document.getElementById("m-pnl-10000");
+        const p25000 = document.getElementById("m-pnl-25000");
+
+        const fmtPnl = (q) => {
+          const val = q * deltaPrice;
+          return `${val >= 0 ? '+' : ''}₹${Math.round(val).toLocaleString()}`;
+        };
+        const pnlCls = isUp ? 'font-bold text-emerald-400 block' : 'font-bold text-rose-400 block';
+
+        if (p1000) { p1000.innerText = fmtPnl(1000); p1000.className = pnlCls; }
+        if (p5000) { p5000.innerText = fmtPnl(5000); p5000.className = pnlCls; }
+        if (p10000) { p10000.innerText = fmtPnl(10000); p10000.className = pnlCls; }
+        if (p25000) { p25000.innerText = fmtPnl(25000); p25000.className = pnlCls; }
+
+        // Position HUD near end of box
+        const hudX = Math.min(canvas.width - 260, Math.max(10, Math.max(x1, x2) + 12));
+        const hudY = Math.min(canvas.height - 230, Math.max(10, Math.min(y1, y2)));
+        hud.style.left = `${hudX}px`;
+        hud.style.top = `${hudY}px`;
+      }
+    }
+
+    function clearMeasurement() {
+      measureStartPoint = null;
+      measureCurrentPoint = null;
+      isMeasureDragging = false;
+      const canvas = document.getElementById("measure-canvas");
+      if (canvas) {
+        const ctx = canvas.getContext("2d");
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
+      const hud = document.getElementById("measure-hud");
+      if (hud) hud.classList.add("hidden");
+    }
+
+    function applyMeasurementToPlanner() {
+      if (!measureStartPoint || !measureCurrentPoint) return;
+      const p1 = Number(measureStartPoint.price.toFixed(2));
+      const p2 = Number(measureCurrentPoint.price.toFixed(2));
+
+      const inpEntry = document.getElementById("inp-entry");
+      const inpTarget = document.getElementById("inp-target");
+      const inpSl = document.getElementById("inp-sl");
+
+      if (inpEntry) inpEntry.value = p1;
+      if (p2 >= p1) {
+        if (inpTarget) inpTarget.value = p2;
+        const slDist = (p2 - p1) / 2;
+        if (inpSl) inpSl.value = Number((p1 - slDist).toFixed(2));
+        setPlannerDirection('LONG');
+      } else {
+        if (inpSl) inpSl.value = p1;
+        if (inpTarget) inpTarget.value = p2;
+        setPlannerDirection('SHORT');
+      }
+      calculateRisk();
+      alert(`✓ Applied measured levels to Position Planner: Entry ₹${p1}, Target ₹${p2}`);
+    }
+
+    function setFixedQty(qty) {
+      const inpCapital = document.getElementById("inp-capital");
+      const inpEntry = document.getElementById("inp-entry");
+      const inpSl = document.getElementById("inp-sl");
+      const inpTarget = document.getElementById("inp-target");
+      const resQty = document.getElementById("res-qty");
+      const resLots = document.getElementById("res-lots");
+      const resRiskAmt = document.getElementById("res-risk-amt");
+      const tag = document.getElementById("small-stock-tag");
+
+      const entry = Number(inpEntry.value) || 15;
+      const sl = Number(inpSl.value) || (entry * 0.98);
+      const target = Number(inpTarget.value) || (entry * 1.05);
+
+      const capitalNeeded = Math.round(qty * entry);
+      const riskAmt = Math.round(qty * Math.abs(entry - sl));
+      const profitAmt = Math.round(qty * Math.abs(target - entry));
+
+      if (resQty) resQty.innerText = qty.toLocaleString();
+      if (resLots) resLots.innerText = `Cap: ₹${capitalNeeded.toLocaleString()}`;
+      if (resRiskAmt) resRiskAmt.innerText = `₹${riskAmt.toLocaleString()}`;
+      if (tag) tag.innerText = `₹${profitAmt.toLocaleString()} Gain`;
+
+      alert(`Selected ${qty.toLocaleString()} shares of ${activeSymbol.replace('.NS','')}:
+• Capital: ₹${capitalNeeded.toLocaleString()}
+• Potential Profit: +₹${profitAmt.toLocaleString()}
+• Stop Loss Risk: -₹${riskAmt.toLocaleString()}`);
     }
 
     function setChartEngine(engine) {

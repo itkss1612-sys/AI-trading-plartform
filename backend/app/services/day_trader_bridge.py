@@ -72,7 +72,20 @@ NSE_UNIVERSE = [
     {"symbol": "CENTRALBK.NS", "name": "Central Bank of India", "exchange": "NSE", "category": "EQUITY", "sector": "PSU Banking", "currency": "₹", "cap": "SMALL"},
     {"symbol": "APOLLOTYRE.NS", "name": "Apollo Tyres Ltd", "exchange": "NSE", "category": "EQUITY", "sector": "Tyres & Rubber", "currency": "₹", "cap": "SMALL"},
     {"symbol": "MANAPPURAM.NS", "name": "Manappuram Finance Ltd", "exchange": "NSE", "category": "EQUITY", "sector": "Gold Loan NBFC", "currency": "₹", "cap": "SMALL"},
-    {"symbol": "DATAPATTNS.NS", "name": "Data Patterns (India) Ltd", "exchange": "NSE", "category": "EQUITY", "sector": "Defense Electronics", "currency": "₹", "cap": "SMALL"}
+    {"symbol": "DATAPATTNS.NS", "name": "Data Patterns (India) Ltd", "exchange": "NSE", "category": "EQUITY", "sector": "Defense Electronics", "currency": "₹", "cap": "SMALL"},
+
+    # High Volume Penny & Low-Priced Small Stocks (< ₹50 / < ₹100)
+    {"symbol": "IDEA.NS", "name": "Vodafone Idea Ltd", "exchange": "NSE", "category": "EQUITY", "sector": "Telecom / Penny", "currency": "₹", "cap": "PENNY"},
+    {"symbol": "YESBANK.NS", "name": "Yes Bank Ltd", "exchange": "NSE", "category": "EQUITY", "sector": "Private Banking / Penny", "currency": "₹", "cap": "PENNY"},
+    {"symbol": "RPOWER.NS", "name": "Reliance Power Ltd", "exchange": "NSE", "category": "EQUITY", "sector": "Power / Penny", "currency": "₹", "cap": "PENNY"},
+    {"symbol": "JPPOWER.NS", "name": "Jaiprakash Power Ventures", "exchange": "NSE", "category": "EQUITY", "sector": "Power / Penny", "currency": "₹", "cap": "PENNY"},
+    {"symbol": "SOUTHBANK.NS", "name": "The South Indian Bank Ltd", "exchange": "NSE", "category": "EQUITY", "sector": "Banking / Small Cap", "currency": "₹", "cap": "SMALL"},
+    {"symbol": "TRIDENT.NS", "name": "Trident Ltd", "exchange": "NSE", "category": "EQUITY", "sector": "Textiles / Penny", "currency": "₹", "cap": "PENNY"},
+    {"symbol": "IRFC.NS", "name": "Indian Railway Finance Corp", "exchange": "NSE", "category": "EQUITY", "sector": "Railways / Finance", "currency": "₹", "cap": "SMALL"},
+    {"symbol": "GTLINFRA.NS", "name": "GTL Infrastructure Ltd", "exchange": "NSE", "category": "EQUITY", "sector": "Telecom Infra / Penny", "currency": "₹", "cap": "PENNY"},
+    {"symbol": "ALOKINDS.NS", "name": "Alok Industries Ltd", "exchange": "NSE", "category": "EQUITY", "sector": "Textiles / Penny", "currency": "₹", "cap": "PENNY"},
+    {"symbol": "RENUKA.NS", "name": "Shree Renuka Sugars Ltd", "exchange": "NSE", "category": "EQUITY", "sector": "Sugar / Penny", "currency": "₹", "cap": "PENNY"},
+    {"symbol": "INFIBEAM.NS", "name": "Infibeam Avenues Ltd", "exchange": "NSE", "category": "EQUITY", "sector": "Fintech / Penny", "currency": "₹", "cap": "PENNY"}
 ]
 
 class DayTraderBridge:
