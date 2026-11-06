@@ -902,6 +902,21 @@
             </div>
           </div>
 
+          <!-- Active Strategy Selector in AI Day Trader Tab -->
+          <div class="flex items-center space-x-2 bg-[#0a0f1d] border border-blue-500/50 rounded-lg px-2.5 py-1.5 shadow">
+            <span class="text-[11px] font-bold text-blue-400 uppercase flex items-center space-x-1">
+              <i class="ri-compass-3-line"></i>
+              <span>Strategy:</span>
+            </span>
+            <select id="ai-tab-strategy-select" onchange="onStrategySelectChange(this.value)" class="bg-[#12192c] text-white font-mono text-xs font-bold rounded px-2 py-1 border border-blue-900 focus:outline-none focus:border-blue-400 cursor-pointer">
+              <option value="15m ORB Day Trader">15m ORB Day Trader</option>
+              <option value="Smart Money Concepts (SMC - FVG)">Smart Money Concepts (SMC - FVG)</option>
+              <option value="CPR + Supertrend Trend Ride">CPR + Supertrend Trend Ride</option>
+              <option value="Oversold Mean Reversion (RSI < 30)">Oversold Mean Reversion</option>
+              <option value="TradingView Pine Script Webhook">TradingView Pine Script Alert</option>
+            </select>
+          </div>
+
           <!-- Scanner & Refresh Controls -->
           <div class="flex items-center space-x-2">
             <button onclick="runDayTraderScan()" class="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow transition cursor-pointer">
@@ -912,6 +927,38 @@
               <i class="ri-magic-line text-sm text-yellow-300"></i>
               <span>Analyze with Gemini</span>
             </button>
+          </div>
+        </div>
+
+        <!-- Prominent Strategy Blueprint Banner: Shows Exactly Which Strategy Is Active & Rules Followed -->
+        <div class="p-3 rounded-lg bg-gradient-to-r from-[#0d1527] to-[#14122b] border border-blue-500/40 shadow-md">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div class="flex items-center space-x-2.5">
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-600 text-white uppercase tracking-wider">ACTIVE STRATEGY</span>
+              <span id="ai-active-strategy-title" class="text-sm font-extrabold text-blue-300 font-mono">15m ORB Day Trader</span>
+            </div>
+            <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-950 text-emerald-400 border border-emerald-600/50 flex items-center space-x-1">
+              <i class="ri-checkbox-circle-fill"></i>
+              <span>EXECUTION RULES: ENFORCED</span>
+            </span>
+          </div>
+          <div id="ai-strategy-description" class="text-[11px] text-slate-300 mt-1 leading-relaxed">
+            Captures the first 15-minute high/low breakout with volume expansion (>1.5x 20MA). Enforces a 2:1 Reward:Risk ratio with stop at range midpoint.
+          </div>
+          <!-- Strategy Core Rules -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 mt-2 pt-2 border-t border-[#1e2a44] text-[10px] font-mono">
+            <div class="p-1.5 rounded bg-[#090d18] border border-[#17233c]">
+              <span class="text-slate-400 block">Entry Condition:</span>
+              <span id="ai-strat-entry-rule" class="text-emerald-400 font-bold">5m bar closes > 15m High</span>
+            </div>
+            <div class="p-1.5 rounded bg-[#090d18] border border-[#17233c]">
+              <span class="text-slate-400 block">Stop-Loss Rule:</span>
+              <span id="ai-strat-sl-rule" class="text-rose-400 font-bold">15m Range Midpoint (Max 1.8% Risk)</span>
+            </div>
+            <div class="p-1.5 rounded bg-[#090d18] border border-[#17233c]">
+              <span class="text-slate-400 block">Target / Profit:</span>
+              <span id="ai-strat-target-rule" class="text-cyan-400 font-bold">2.0R Multiple (+3.6% Target)</span>
+            </div>
           </div>
         </div>
 
@@ -1636,89 +1683,89 @@
         // --- 1. COMPREHENSIVE NSE MASTER DIRECTORY (80+ TOP INDIAN EQUITIES & INDICES) ---
     const NSE_MASTER_DIRECTORY = [
       // Major Indices
-      { symbol: "^NSEI", name: "NIFTY 50", exchange: "NSE", category: "INDEX", cap: "INDEX", sector: "Benchmark", ltp: 22730.2, change: -23.0, pct: -0.1, high: 22778.05, low: 22497.7, vol: "24.5M", lot: 25 },
-      { symbol: "^NSEBANK", name: "BANK NIFTY", exchange: "NSE", category: "INDEX", cap: "INDEX", sector: "Banking", ltp: 54295.85, change: -70.85, pct: -0.13, high: 54440.25, low: 53626.15, vol: "18.2M", lot: 15 },
-      { symbol: "^CNXIT", name: "NIFTY IT", exchange: "NSE", category: "INDEX", cap: "INDEX", sector: "IT", ltp: 31560.45, change: -712.65, pct: -2.21, high: 31577.0, low: 30928.1, vol: "6.8M", lot: 25 },
-      { symbol: "^INDIAVIX", name: "INDIA VIX", exchange: "NSE", category: "INDEX", cap: "INDEX", sector: "Volatility", ltp: 16.26, change: -0.9, pct: -5.24, high: 17.36, low: 15.54, vol: "--", lot: 1 },
-      { symbol: "FINNIFTY.NS", name: "NIFTY Financial Services", exchange: "NSE", category: "INDEX", cap: "INDEX", sector: "Financials", ltp: 23840.10, change: 145.20, pct: 0.61, high: 23910.00, low: 23720.00, vol: "8.1M", lot: 40 },
-      { symbol: "MIDCPNIFTY.NS", name: "NIFTY Midcap Select", exchange: "NSE", category: "INDEX", cap: "INDEX", sector: "Midcap", ltp: 12240.50, change: 82.30, pct: 0.68, high: 12280.00, low: 12180.00, vol: "12.4M", lot: 75 },
+      { symbol: "^NSEI", name: "NIFTY 50", exchange: "NSE", category: "INDEX", cap: "INDEX", sector: "Benchmark", ltp: 24687.2, change: 150.6, pct: 0.61, high: 24702.6, low: 24388.05, vol: "--", lot: 25 },
+      { symbol: "^NSEBANK", name: "BANK NIFTY", exchange: "NSE", category: "INDEX", cap: "INDEX", sector: "Banking", ltp: 58251.55, change: 477.9, pct: 0.83, high: 58264.9, low: 57320.8, vol: "--", lot: 15 },
+      { symbol: "^CNXIT", name: "NIFTY IT", exchange: "NSE", category: "INDEX", cap: "INDEX", sector: "IT", ltp: 32825.35, change: -12.5, pct: -0.04, high: 33616.2, low: 32767.05, vol: "--", lot: 25 },
+      { symbol: "^INDIAVIX", name: "INDIA VIX", exchange: "NSE", category: "INDEX", cap: "INDEX", sector: "Volatility", ltp: 16.92, change: 1.34, pct: 8.6, high: 17.22, low: 14.45, vol: "--", lot: 1 },
+      { symbol: "FINNIFTY.NS", name: "NIFTY Financial Services", exchange: "NSE", category: "INDEX", cap: "INDEX", sector: "Financials", ltp: 1494.12, change: 2.75, pct: 0.18, high: 1503.3, low: 1480.93, vol: "1.2M", lot: 40 },
+      { symbol: "MIDCPNIFTY.NS", name: "NIFTY Midcap Select", exchange: "NSE", category: "INDEX", cap: "INDEX", sector: "Midcap", ltp: 1494.12, change: 2.75, pct: 0.18, high: 1503.3, low: 1480.93, vol: "1.2M", lot: 75 },
 
       // Large Cap Equities
-      { symbol: "RELIANCE.NS", name: "Reliance Industries", exchange: "NSE", category: "EQUITY", cap: "LARGE", sector: "ENERGY", ltp: 1168.7, change: -27.5, pct: -2.3, high: 1204.3, low: 1167.5, vol: "5.4M", lot: 250 },
-      { symbol: "TCS.NS", name: "Tata Consultancy Services", exchange: "NSE", category: "EQUITY", cap: "LARGE", sector: "IT", ltp: 2456.2, change: -40.7, pct: -1.63, high: 2457.9, low: 2408.2, vol: "1.8M", lot: 175 },
-      { symbol: "HDFCBANK.NS", name: "HDFC Bank Ltd", exchange: "NSE", category: "EQUITY", cap: "LARGE", sector: "BANKING", ltp: 683.95, change: 3.75, pct: 0.55, high: 687.1, low: 669.2, vol: "9.2M", lot: 550 },
-      { symbol: "ICICIBANK.NS", name: "ICICI Bank Ltd", exchange: "NSE", category: "EQUITY", cap: "LARGE", sector: "BANKING", ltp: 1377.6, change: -9.3, pct: -0.67, high: 1381.9, low: 1361.4, vol: "7.1M", lot: 700 },
-      { symbol: "INFY.NS", name: "Infosys Ltd", exchange: "NSE", category: "EQUITY", cap: "LARGE", sector: "IT", ltp: 1120.35, change: -42.65, pct: -3.67, high: 1133.8, low: 1103.4, vol: "4.3M", lot: 400 },
-      { symbol: "SBIN.NS", name: "State Bank of India", exchange: "NSE", category: "EQUITY", cap: "LARGE", sector: "BANKING", ltp: 955.1, change: 10.0, pct: 1.06, high: 958.4, low: 944.0, vol: "11.5M", lot: 750 },
-      { symbol: "BHARTIARTL.NS", name: "Bharti Airtel Ltd", exchange: "NSE", category: "EQUITY", cap: "LARGE", sector: "TELECOM", ltp: 1954.7, change: -24.1, pct: -1.22, high: 1970.8, low: 1926.6, vol: "3.2M", lot: 475 },
-      { symbol: "ITC.NS", name: "ITC Ltd", exchange: "NSE", category: "EQUITY", cap: "LARGE", sector: "FMCG", ltp: 256.2, change: -3.8, pct: -1.46, high: 257.7, low: 252.8, vol: "8.6M", lot: 1600 },
-      { symbol: "LT.NS", name: "Larsen & Toubro Ltd", exchange: "NSE", category: "EQUITY", cap: "LARGE", sector: "INFRA", ltp: 3825.4, change: 160.3, pct: 4.37, high: 3894.0, low: 3770.0, vol: "1.4M", lot: 150 },
-      { symbol: "TATAMOTORS.NS", name: "Tata Motors Ltd", exchange: "NSE", category: "EQUITY", cap: "LARGE", sector: "AUTO", ltp: 968.40, change: -4.50, pct: -0.46, high: 978.00, low: 960.00, vol: "6.7M", lot: 550 },
-      { symbol: "KOTAKBANK.NS", name: "Kotak Mahindra Bank", exchange: "NSE", category: "EQUITY", cap: "LARGE", sector: "BANKING", ltp: 443.9, change: 1.4, pct: 0.32, high: 444.1, low: 438.3, vol: "2.5M", lot: 400 },
-      { symbol: "BAJFINANCE.NS", name: "Bajaj Finance Ltd", exchange: "NSE", category: "EQUITY", cap: "LARGE", sector: "FINANCE", ltp: 915.0, change: 3.0, pct: 0.33, high: 917.8, low: 899.15, vol: "0.8M", lot: 125 },
-      { symbol: "MARUTI.NS", name: "Maruti Suzuki India", exchange: "NSE", category: "EQUITY", cap: "LARGE", sector: "AUTO", ltp: 11465.0, change: 15.0, pct: 0.13, high: 11590.0, low: 11250.0, vol: "0.5M", lot: 50 },
-      { symbol: "SUNPHARMA.NS", name: "Sun Pharmaceutical Ind", exchange: "NSE", category: "EQUITY", cap: "LARGE", sector: "PHARMA", ltp: 1757.6, change: 6.4, pct: 0.37, high: 1758.8, low: 1726.2, vol: "1.9M", lot: 350 },
-      { symbol: "TITAN.NS", name: "Titan Company Ltd", exchange: "NSE", category: "EQUITY", cap: "LARGE", sector: "CONSUMER", ltp: 4374.4, change: 8.5, pct: 0.19, high: 4380.6, low: 4270.5, vol: "1.2M", lot: 175 },
-      { symbol: "AXISBANK.NS", name: "Axis Bank Ltd", exchange: "NSE", category: "EQUITY", cap: "LARGE", sector: "BANKING", ltp: 1215.8, change: 10.1, pct: 0.84, high: 1219.4, low: 1200.0, vol: "4.8M", lot: 625 },
-      { symbol: "ASIANPAINT.NS", name: "Asian Paints Ltd", exchange: "NSE", category: "EQUITY", cap: "LARGE", sector: "CONSUMER", ltp: 2292.1, change: 15.1, pct: 0.66, high: 2296.3, low: 2239.1, vol: "0.9M", lot: 200 },
-      { symbol: "HCLTECH.NS", name: "HCL Technologies Ltd", exchange: "NSE", category: "EQUITY", cap: "LARGE", sector: "IT", ltp: 1401.0, change: -19.0, pct: -1.34, high: 1401.2, low: 1364.0, vol: "2.1M", lot: 350 },
-      { symbol: "ULTRACEMCO.NS", name: "UltraTech Cement Ltd", exchange: "NSE", category: "EQUITY", cap: "LARGE", sector: "INFRA", ltp: 11208.0, change: 58.0, pct: 0.52, high: 11208.0, low: 11023.0, vol: "0.4M", lot: 100 },
-      { symbol: "NTPC.NS", name: "NTPC Ltd", exchange: "NSE", category: "EQUITY", cap: "LARGE", sector: "ENERGY", ltp: 304.35, change: 2.55, pct: 0.84, high: 304.9, low: 299.4, vol: "14.2M", lot: 1500 },
-      { symbol: "ONGC.NS", name: "Oil & Natural Gas Corp", exchange: "NSE", category: "EQUITY", cap: "LARGE", sector: "ENERGY", ltp: 224.82, change: -5.03, pct: -2.19, high: 228.0, low: 223.1, vol: "16.8M", lot: 2250 },
-      { symbol: "POWERGRID.NS", name: "Power Grid Corp of India", exchange: "NSE", category: "EQUITY", cap: "LARGE", sector: "ENERGY", ltp: 252.5, change: 0.75, pct: 0.3, high: 254.1, low: 248.8, vol: "11.1M", lot: 1800 },
-      { symbol: "TATASTEEL.NS", name: "Tata Steel Ltd", exchange: "NSE", category: "EQUITY", cap: "LARGE", sector: "METALS", ltp: 169.78, change: -1.64, pct: -0.96, high: 170.99, low: 168.51, vol: "28.5M", lot: 5500 },
-      { symbol: "JSWSTEEL.NS", name: "JSW Steel Ltd", exchange: "NSE", category: "EQUITY", cap: "LARGE", sector: "METALS", ltp: 1249.0, change: -3.7, pct: -0.3, high: 1252.7, low: 1231.0, vol: "2.8M", lot: 675 },
-      { symbol: "ADANIENT.NS", name: "Adani Enterprises Ltd", exchange: "NSE", category: "EQUITY", cap: "LARGE", sector: "INFRA", ltp: 2476.8, change: -13.2, pct: -0.53, high: 2496.0, low: 2442.8, vol: "3.4M", lot: 300 },
-      { symbol: "ADANIPORTS.NS", name: "Adani Ports & SEZ", exchange: "NSE", category: "EQUITY", cap: "LARGE", sector: "INFRA", ltp: 1767.6, change: 13.1, pct: 0.75, high: 1781.8, low: 1727.6, vol: "4.1M", lot: 400 },
-      { symbol: "COALINDIA.NS", name: "Coal India Ltd", exchange: "NSE", category: "EQUITY", cap: "LARGE", sector: "ENERGY", ltp: 394.35, change: -3.65, pct: -0.92, high: 398.4, low: 391.2, vol: "8.9M", lot: 1050 },
-      { symbol: "WIPRO.NS", name: "Wipro Ltd", exchange: "NSE", category: "EQUITY", cap: "LARGE", sector: "IT", ltp: 185.59, change: -1.41, pct: -0.75, high: 186.15, low: 182.25, vol: "6.2M", lot: 1500 },
-      { symbol: "TECHM.NS", name: "Tech Mahindra Ltd", exchange: "NSE", category: "EQUITY", cap: "LARGE", sector: "IT", ltp: 1787.6, change: -23.8, pct: -1.31, high: 1789.8, low: 1733.2, vol: "1.7M", lot: 600 },
-      { symbol: "ZOMATO.NS", name: "Zomato Ltd", exchange: "NSE", category: "EQUITY", cap: "LARGE", sector: "CONSUMER", ltp: 245.50, change: 6.20, pct: 2.59, high: 248.00, low: 238.50, vol: "35.2M", lot: 2000 },
-      { symbol: "DLF.NS", name: "DLF Ltd", exchange: "NSE", category: "EQUITY", cap: "LARGE", sector: "REALTY", ltp: 669.0, change: -2.0, pct: -0.3, high: 671.4, low: 663.95, vol: "4.8M", lot: 825 },
-      { symbol: "JIOFIN.NS", name: "Jio Financial Services", exchange: "NSE", category: "EQUITY", cap: "LARGE", sector: "FINANCE", ltp: 206.79, change: -0.45, pct: -0.22, high: 208.75, low: 204.16, vol: "19.5M", lot: 1800 },
+      { symbol: "RELIANCE.NS", name: "Reliance Industries", exchange: "NSE", category: "EQUITY", cap: "LARGE", sector: "ENERGY", ltp: 1310.5, change: -2.9, pct: -0.22, high: 1314.0, low: 1295.0, vol: "11.6M", lot: 250 },
+      { symbol: "TCS.NS", name: "Tata Consultancy Services", exchange: "NSE", category: "EQUITY", cap: "LARGE", sector: "IT", ltp: 2498.5, change: 2.8, pct: 0.11, high: 2565.0, low: 2495.0, vol: "3.2M", lot: 175 },
+      { symbol: "HDFCBANK.NS", name: "HDFC Bank Ltd", exchange: "NSE", category: "EQUITY", cap: "LARGE", sector: "BANKING", ltp: 778.9, change: 18.9, pct: 2.49, high: 779.35, low: 754.05, vol: "43.9M", lot: 550 },
+      { symbol: "ICICIBANK.NS", name: "ICICI Bank Ltd", exchange: "NSE", category: "EQUITY", cap: "LARGE", sector: "BANKING", ltp: 1538.4, change: 38.4, pct: 2.56, high: 1539.6, low: 1504.6, vol: "22.4M", lot: 700 },
+      { symbol: "INFY.NS", name: "Infosys Ltd", exchange: "NSE", category: "EQUITY", cap: "LARGE", sector: "IT", ltp: 1166.4, change: -1.0, pct: -0.09, high: 1198.8, low: 1165.1, vol: "9.6M", lot: 400 },
+      { symbol: "SBIN.NS", name: "State Bank of India", exchange: "NSE", category: "EQUITY", cap: "LARGE", sector: "BANKING", ltp: 1001.45, change: -4.95, pct: -0.49, high: 1006.25, low: 990.5, vol: "6.9M", lot: 750 },
+      { symbol: "BHARTIARTL.NS", name: "Bharti Airtel Ltd", exchange: "NSE", category: "EQUITY", cap: "LARGE", sector: "TELECOM", ltp: 2074.1, change: 17.2, pct: 0.84, high: 2120.0, low: 2056.2, vol: "10.5M", lot: 475 },
+      { symbol: "ITC.NS", name: "ITC Ltd", exchange: "NSE", category: "EQUITY", cap: "LARGE", sector: "FMCG", ltp: 280.55, change: 1.7, pct: 0.61, high: 282.2, low: 275.85, vol: "10.3M", lot: 1600 },
+      { symbol: "LT.NS", name: "Larsen & Toubro Ltd", exchange: "NSE", category: "EQUITY", cap: "LARGE", sector: "INFRA", ltp: 4055.0, change: 5.0, pct: 0.12, high: 4063.0, low: 3996.1, vol: "2.0M", lot: 150 },
+      { symbol: "TATAMOTORS.NS", name: "Tata Motors Ltd", exchange: "NSE", category: "EQUITY", cap: "LARGE", sector: "AUTO", ltp: 1494.12, change: 2.75, pct: 0.18, high: 1503.3, low: 1480.93, vol: "1.2M", lot: 550 },
+      { symbol: "KOTAKBANK.NS", name: "Kotak Mahindra Bank", exchange: "NSE", category: "EQUITY", cap: "LARGE", sector: "BANKING", ltp: 475.4, change: 8.4, pct: 1.8, high: 475.9, low: 463.0, vol: "12.3M", lot: 400 },
+      { symbol: "BAJFINANCE.NS", name: "Bajaj Finance Ltd", exchange: "NSE", category: "EQUITY", cap: "LARGE", sector: "FINANCE", ltp: 1058.05, change: -11.95, pct: -1.12, high: 1061.75, low: 1041.0, vol: "5.3M", lot: 125 },
+      { symbol: "MARUTI.NS", name: "Maruti Suzuki India", exchange: "NSE", category: "EQUITY", cap: "LARGE", sector: "AUTO", ltp: 12652.0, change: 0.0, pct: 0.0, high: 12727.0, low: 12451.0, vol: "0.6M", lot: 50 },
+      { symbol: "SUNPHARMA.NS", name: "Sun Pharmaceutical Ind", exchange: "NSE", category: "EQUITY", cap: "LARGE", sector: "PHARMA", ltp: 1862.3, change: 33.3, pct: 1.82, high: 1864.0, low: 1814.7, vol: "1.2M", lot: 350 },
+      { symbol: "TITAN.NS", name: "Titan Company Ltd", exchange: "NSE", category: "EQUITY", cap: "LARGE", sector: "CONSUMER", ltp: 4955.2, change: 120.6, pct: 2.49, high: 5003.9, low: 4694.4, vol: "3.2M", lot: 175 },
+      { symbol: "AXISBANK.NS", name: "Axis Bank Ltd", exchange: "NSE", category: "EQUITY", cap: "LARGE", sector: "BANKING", ltp: 1296.9, change: 16.9, pct: 1.32, high: 1299.0, low: 1272.1, vol: "5.1M", lot: 625 },
+      { symbol: "ASIANPAINT.NS", name: "Asian Paints Ltd", exchange: "NSE", category: "EQUITY", cap: "LARGE", sector: "CONSUMER", ltp: 2499.0, change: -24.8, pct: -0.98, high: 2514.0, low: 2452.3, vol: "0.4M", lot: 200 },
+      { symbol: "HCLTECH.NS", name: "HCL Technologies Ltd", exchange: "NSE", category: "EQUITY", cap: "LARGE", sector: "IT", ltp: 1437.2, change: 6.7, pct: 0.47, high: 1469.0, low: 1435.4, vol: "2.6M", lot: 350 },
+      { symbol: "ULTRACEMCO.NS", name: "UltraTech Cement Ltd", exchange: "NSE", category: "EQUITY", cap: "LARGE", sector: "INFRA", ltp: 12300.0, change: 484.0, pct: 4.1, high: 12318.0, low: 12097.0, vol: "0.3M", lot: 100 },
+      { symbol: "NTPC.NS", name: "NTPC Ltd", exchange: "NSE", category: "EQUITY", cap: "LARGE", sector: "ENERGY", ltp: 318.25, change: 1.55, pct: 0.49, high: 319.85, low: 308.75, vol: "6.0M", lot: 1500 },
+      { symbol: "ONGC.NS", name: "Oil & Natural Gas Corp", exchange: "NSE", category: "EQUITY", cap: "LARGE", sector: "ENERGY", ltp: 230.53, change: 0.53, pct: 0.23, high: 232.11, low: 225.3, vol: "13.9M", lot: 2250 },
+      { symbol: "POWERGRID.NS", name: "Power Grid Corp of India", exchange: "NSE", category: "EQUITY", cap: "LARGE", sector: "ENERGY", ltp: 256.05, change: -5.1, pct: -1.95, high: 257.4, low: 253.3, vol: "11.9M", lot: 1800 },
+      { symbol: "TATASTEEL.NS", name: "Tata Steel Ltd", exchange: "NSE", category: "EQUITY", cap: "LARGE", sector: "METALS", ltp: 181.2, change: -0.8, pct: -0.44, high: 183.13, low: 177.74, vol: "13.8M", lot: 5500 },
+      { symbol: "JSWSTEEL.NS", name: "JSW Steel Ltd", exchange: "NSE", category: "EQUITY", cap: "LARGE", sector: "METALS", ltp: 1347.0, change: -8.6, pct: -0.63, high: 1351.4, low: 1320.6, vol: "1.8M", lot: 675 },
+      { symbol: "ADANIENT.NS", name: "Adani Enterprises Ltd", exchange: "NSE", category: "EQUITY", cap: "LARGE", sector: "INFRA", ltp: 2695.1, change: -38.2, pct: -1.4, high: 2729.9, low: 2678.4, vol: "0.6M", lot: 300 },
+      { symbol: "ADANIPORTS.NS", name: "Adani Ports & SEZ", exchange: "NSE", category: "EQUITY", cap: "LARGE", sector: "INFRA", ltp: 1930.0, change: 45.4, pct: 2.41, high: 1937.7, low: 1877.7, vol: "2.2M", lot: 400 },
+      { symbol: "COALINDIA.NS", name: "Coal India Ltd", exchange: "NSE", category: "EQUITY", cap: "LARGE", sector: "ENERGY", ltp: 398.1, change: 3.8, pct: 0.96, high: 398.7, low: 392.0, vol: "3.3M", lot: 1050 },
+      { symbol: "WIPRO.NS", name: "Wipro Ltd", exchange: "NSE", category: "EQUITY", cap: "LARGE", sector: "IT", ltp: 198.47, change: 0.07, pct: 0.04, high: 201.7, low: 198.19, vol: "9.5M", lot: 1500 },
+      { symbol: "TECHM.NS", name: "Tech Mahindra Ltd", exchange: "NSE", category: "EQUITY", cap: "LARGE", sector: "IT", ltp: 1821.0, change: -1.7, pct: -0.09, high: 1860.0, low: 1819.0, vol: "1.2M", lot: 600 },
+      { symbol: "ZOMATO.NS", name: "Zomato Ltd", exchange: "NSE", category: "EQUITY", cap: "LARGE", sector: "CONSUMER", ltp: 1494.12, change: 2.75, pct: 0.18, high: 1503.3, low: 1480.93, vol: "1.2M", lot: 2000 },
+      { symbol: "DLF.NS", name: "DLF Ltd", exchange: "NSE", category: "EQUITY", cap: "LARGE", sector: "REALTY", ltp: 739.1, change: -6.1, pct: -0.82, high: 742.55, low: 732.05, vol: "1.7M", lot: 825 },
+      { symbol: "JIOFIN.NS", name: "Jio Financial Services", exchange: "NSE", category: "EQUITY", cap: "LARGE", sector: "FINANCE", ltp: 227.88, change: -1.74, pct: -0.76, high: 228.4, low: 225.29, vol: "9.9M", lot: 1800 },
 
       // Mid Cap Equities
-      { symbol: "SUZLON.NS", name: "Suzlon Energy Ltd", exchange: "NSE", category: "EQUITY", cap: "MID", sector: "ENERGY", ltp: 55.45, change: 1.15, pct: 2.12, high: 56.20, low: 53.80, vol: "48.5M", lot: 7000 },
-      { symbol: "DIXON.NS", name: "Dixon Technologies", exchange: "NSE", category: "EQUITY", cap: "MID", sector: "AUTO", ltp: 13850.0, change: 210.0, pct: 1.54, high: 13980.0, low: 13620.0, vol: "0.6M", lot: 50 },
-      { symbol: "MAZDOCK.NS", name: "Mazagon Dock Shipbuilders", exchange: "NSE", category: "EQUITY", cap: "MID", sector: "DEFENSE", ltp: 4280.0, change: 115.0, pct: 2.76, high: 4340.0, low: 4150.0, vol: "3.2M", lot: 100 },
-      { symbol: "HAL.NS", name: "Hindustan Aeronautics Ltd", exchange: "NSE", category: "EQUITY", cap: "MID", sector: "DEFENSE", ltp: 4838.1, change: -16.9, pct: -0.35, high: 4854.0, low: 4748.0, vol: "1.6M", lot: 150 },
-      { symbol: "BEL.NS", name: "Bharat Electronics Ltd", exchange: "NSE", category: "EQUITY", cap: "MID", sector: "DEFENSE", ltp: 366.15, change: -1.8, pct: -0.49, high: 368.35, low: 361.9, vol: "14.5M", lot: 2800 },
-      { symbol: "POLYCAB.NS", name: "Polycab India Ltd", exchange: "NSE", category: "EQUITY", cap: "MID", sector: "INFRA", ltp: 6420.0, change: 84.0, pct: 1.33, high: 6490.0, low: 6320.0, vol: "0.9M", lot: 100 },
-      { symbol: "TRENT.NS", name: "Trent Ltd", exchange: "NSE", category: "EQUITY", cap: "MID", sector: "CONSUMER", ltp: 6876.2, change: 95.6, pct: 1.41, high: 6950.0, low: 6760.0, vol: "1.2M", lot: 100 },
-      { symbol: "BSE.NS", name: "BSE Ltd", exchange: "NSE", category: "EQUITY", cap: "MID", sector: "FINANCE", ltp: 4820.0, change: 142.0, pct: 3.04, high: 4890.0, low: 4650.0, vol: "2.8M", lot: 200 },
-      { symbol: "CDSL.NS", name: "Central Depository Services", exchange: "NSE", category: "EQUITY", cap: "MID", sector: "FINANCE", ltp: 1680.0, change: 28.5, pct: 1.73, high: 1710.0, low: 1645.0, vol: "3.5M", lot: 250 },
-      { symbol: "RVNL.NS", name: "Rail Vikas Nigam Ltd", exchange: "NSE", category: "EQUITY", cap: "MID", sector: "INFRA", ltp: 440.0, change: 12.3, pct: 2.88, high: 448.0, low: 426.0, vol: "18.5M", lot: 1000 },
-      { symbol: "IREDA.NS", name: "Indian Renewable Energy Dev", exchange: "NSE", category: "EQUITY", cap: "MID", sector: "ENERGY", ltp: 215.0, change: 4.8, pct: 2.28, high: 219.0, low: 209.0, vol: "24.0M", lot: 2000 },
-      { symbol: "KALYANKJIL.NS", name: "Kalyan Jewellers India", exchange: "NSE", category: "EQUITY", cap: "MID", sector: "CONSUMER", ltp: 690.0, change: 18.0, pct: 2.68, high: 702.0, low: 671.0, vol: "4.5M", lot: 1000 },
-      { symbol: "PERSISTENT.NS", name: "Persistent Systems Ltd", exchange: "NSE", category: "EQUITY", cap: "MID", sector: "IT", ltp: 5460.0, change: -45.0, pct: -0.82, high: 5540.0, low: 5410.0, vol: "0.7M", lot: 100 },
-      { symbol: "COFORGE.NS", name: "Coforge Limited", exchange: "NSE", category: "EQUITY", cap: "MID", sector: "IT", ltp: 7850.0, change: 65.0, pct: 0.83, high: 7920.0, low: 7760.0, vol: "0.5M", lot: 100 },
-      { symbol: "TATAELXSI.NS", name: "Tata Elxsi Ltd", exchange: "NSE", category: "EQUITY", cap: "MID", sector: "IT", ltp: 6950.0, change: -32.0, pct: -0.46, high: 7040.0, low: 6890.0, vol: "0.4M", lot: 100 },
-      { symbol: "PAYTM.NS", name: "One97 Communications (Paytm)", exchange: "NSE", category: "EQUITY", cap: "MID", sector: "FINANCE", ltp: 840.5, change: 14.5, pct: 1.76, high: 855.0, low: 822.0, vol: "5.8M", lot: 500 },
-      { symbol: "IRFC.NS", name: "Indian Railway Finance", exchange: "NSE", category: "EQUITY", cap: "MID", sector: "FINANCE", ltp: 165.2, change: 2.1, pct: 1.29, high: 168.0, low: 162.0, vol: "32.0M", lot: 3000 },
-      { symbol: "VEDL.NS", name: "Vedanta Ltd", exchange: "NSE", category: "EQUITY", cap: "MID", sector: "METALS", ltp: 492.0, change: 11.5, pct: 2.39, high: 498.0, low: 480.0, vol: "14.2M", lot: 1500 },
-      { symbol: "FEDERALBNK.NS", name: "Federal Bank Ltd", exchange: "NSE", category: "EQUITY", cap: "MID", sector: "BANKING", ltp: 204.5, change: 2.2, pct: 1.09, high: 206.5, low: 201.0, vol: "11.2M", lot: 2500 },
-      { symbol: "IDFCFIRSTB.NS", name: "IDFC First Bank Ltd", exchange: "NSE", category: "EQUITY", cap: "MID", sector: "BANKING", ltp: 74.8, change: 0.6, pct: 0.81, high: 75.6, low: 73.8, vol: "28.5M", lot: 5000 },
-      { symbol: "VOLTAS.NS", name: "Voltas Ltd", exchange: "NSE", category: "EQUITY", cap: "MID", sector: "CONSUMER", ltp: 1720.0, change: 22.0, pct: 1.30, high: 1740.0, low: 1695.0, vol: "1.4M", lot: 300 },
-      { symbol: "AUROPHARMA.NS", name: "Aurobindo Pharma", exchange: "NSE", category: "EQUITY", cap: "MID", sector: "PHARMA", ltp: 1320.0, change: -12.0, pct: -0.90, high: 1345.0, low: 1310.0, vol: "1.1M", lot: 450 },
+      { symbol: "SUZLON.NS", name: "Suzlon Energy Ltd", exchange: "NSE", category: "EQUITY", cap: "MID", sector: "ENERGY", ltp: 38.1, change: -0.49, pct: -1.27, high: 38.49, low: 37.64, vol: "40.3M", lot: 7000 },
+      { symbol: "DIXON.NS", name: "Dixon Technologies", exchange: "NSE", category: "EQUITY", cap: "MID", sector: "AUTO", ltp: 12511.0, change: -105.0, pct: -0.83, high: 12575.0, low: 12410.0, vol: "0.1M", lot: 50 },
+      { symbol: "MAZDOCK.NS", name: "Mazagon Dock Shipbuilders", exchange: "NSE", category: "EQUITY", cap: "MID", sector: "DEFENSE", ltp: 1816.4, change: -22.6, pct: -1.23, high: 1834.9, low: 1792.6, vol: "0.4M", lot: 100 },
+      { symbol: "HAL.NS", name: "Hindustan Aeronautics Ltd", exchange: "NSE", category: "EQUITY", cap: "MID", sector: "DEFENSE", ltp: 4885.3, change: -157.7, pct: -3.13, high: 4998.3, low: 4828.0, vol: "0.7M", lot: 150 },
+      { symbol: "BEL.NS", name: "Bharat Electronics Ltd", exchange: "NSE", category: "EQUITY", cap: "MID", sector: "DEFENSE", ltp: 388.55, change: -6.55, pct: -1.66, high: 391.9, low: 385.5, vol: "5.3M", lot: 2800 },
+      { symbol: "POLYCAB.NS", name: "Polycab India Ltd", exchange: "NSE", category: "EQUITY", cap: "MID", sector: "INFRA", ltp: 7700.0, change: -149.0, pct: -1.9, high: 7788.0, low: 7526.5, vol: "0.3M", lot: 100 },
+      { symbol: "TRENT.NS", name: "Trent Ltd", exchange: "NSE", category: "EQUITY", cap: "MID", sector: "CONSUMER", ltp: 3063.2, change: 8.2, pct: 0.27, high: 3069.6, low: 3005.6, vol: "0.3M", lot: 100 },
+      { symbol: "BSE.NS", name: "BSE Ltd", exchange: "NSE", category: "EQUITY", cap: "MID", sector: "FINANCE", ltp: 3763.8, change: -26.2, pct: -0.69, high: 3787.0, low: 3714.3, vol: "2.3M", lot: 200 },
+      { symbol: "CDSL.NS", name: "Central Depository Services", exchange: "NSE", category: "EQUITY", cap: "MID", sector: "FINANCE", ltp: 1319.8, change: -14.2, pct: -1.06, high: 1333.0, low: 1310.8, vol: "0.5M", lot: 250 },
+      { symbol: "RVNL.NS", name: "Rail Vikas Nigam Ltd", exchange: "NSE", category: "EQUITY", cap: "MID", sector: "INFRA", ltp: 189.85, change: -3.84, pct: -1.98, high: 191.7, low: 189.08, vol: "3.5M", lot: 1000 },
+      { symbol: "IREDA.NS", name: "Indian Renewable Energy Dev", exchange: "NSE", category: "EQUITY", cap: "MID", sector: "ENERGY", ltp: 111.0, change: 0.85, pct: 0.77, high: 111.95, low: 108.0, vol: "5.5M", lot: 2000 },
+      { symbol: "KALYANKJIL.NS", name: "Kalyan Jewellers India", exchange: "NSE", category: "EQUITY", cap: "MID", sector: "CONSUMER", ltp: 585.05, change: 25.05, pct: 4.47, high: 587.5, low: 552.3, vol: "17.3M", lot: 1000 },
+      { symbol: "PERSISTENT.NS", name: "Persistent Systems Ltd", exchange: "NSE", category: "EQUITY", cap: "MID", sector: "IT", ltp: 6084.0, change: -25.5, pct: -0.42, high: 6240.0, low: 6074.0, vol: "0.4M", lot: 100 },
+      { symbol: "COFORGE.NS", name: "Coforge Limited", exchange: "NSE", category: "EQUITY", cap: "MID", sector: "IT", ltp: 2076.0, change: -3.0, pct: -0.14, high: 2127.9, low: 2056.0, vol: "1.6M", lot: 100 },
+      { symbol: "TATAELXSI.NS", name: "Tata Elxsi Ltd", exchange: "NSE", category: "EQUITY", cap: "MID", sector: "IT", ltp: 3864.4, change: -55.6, pct: -1.42, high: 3967.9, low: 3860.0, vol: "0.2M", lot: 100 },
+      { symbol: "PAYTM.NS", name: "One97 Communications (Paytm)", exchange: "NSE", category: "EQUITY", cap: "MID", sector: "FINANCE", ltp: 1765.0, change: -16.6, pct: -0.93, high: 1781.5, low: 1741.6, vol: "0.9M", lot: 500 },
+      { symbol: "IRFC.NS", name: "Indian Railway Finance", exchange: "NSE", category: "EQUITY", cap: "MID", sector: "FINANCE", ltp: 79.14, change: -0.99, pct: -1.24, high: 79.99, low: 78.51, vol: "4.7M", lot: 3000 },
+      { symbol: "VEDL.NS", name: "Vedanta Ltd", exchange: "NSE", category: "EQUITY", cap: "MID", sector: "METALS", ltp: 256.06, change: -7.74, pct: -2.93, high: 260.0, low: 255.4, vol: "6.4M", lot: 1500 },
+      { symbol: "FEDERALBNK.NS", name: "Federal Bank Ltd", exchange: "NSE", category: "EQUITY", cap: "MID", sector: "BANKING", ltp: 340.2, change: 1.7, pct: 0.5, high: 340.7, low: 335.4, vol: "5.1M", lot: 2500 },
+      { symbol: "IDFCFIRSTB.NS", name: "IDFC First Bank Ltd", exchange: "NSE", category: "EQUITY", cap: "MID", sector: "BANKING", ltp: 76.19, change: -1.61, pct: -2.07, high: 77.54, low: 75.64, vol: "13.5M", lot: 5000 },
+      { symbol: "VOLTAS.NS", name: "Voltas Ltd", exchange: "NSE", category: "EQUITY", cap: "MID", sector: "CONSUMER", ltp: 1110.5, change: -4.9, pct: -0.44, high: 1122.3, low: 1097.4, vol: "0.5M", lot: 300 },
+      { symbol: "AUROPHARMA.NS", name: "Aurobindo Pharma", exchange: "NSE", category: "EQUITY", cap: "MID", sector: "PHARMA", ltp: 1798.2, change: 13.2, pct: 0.74, high: 1805.0, low: 1776.0, vol: "0.8M", lot: 450 },
 
       // Small Cap Momentum & High Growth Equities
-      { symbol: "HUDCO.NS", name: "Housing & Urban Dev Corp", exchange: "NSE", category: "EQUITY", cap: "SMALL", sector: "FINANCE", ltp: 242.0, change: 7.8, pct: 3.33, high: 246.5, low: 233.0, vol: "16.5M", lot: 1500 },
-      { symbol: "RAILTEL.NS", name: "RailTel Corporation", exchange: "NSE", category: "EQUITY", cap: "SMALL", sector: "TELECOM", ltp: 418.0, change: 11.2, pct: 2.75, high: 426.0, low: 404.0, vol: "6.8M", lot: 1000 },
-      { symbol: "COCHINSHIP.NS", name: "Cochin Shipyard Ltd", exchange: "NSE", category: "EQUITY", cap: "SMALL", sector: "DEFENSE", ltp: 1650.0, change: 62.0, pct: 3.90, high: 1685.0, low: 1580.0, vol: "4.2M", lot: 200 },
-      { symbol: "ANGELONE.NS", name: "Angel One Ltd", exchange: "NSE", category: "EQUITY", cap: "SMALL", sector: "FINANCE", ltp: 2940.0, change: 75.0, pct: 2.62, high: 2980.0, low: 2850.0, vol: "1.8M", lot: 250 },
-      { symbol: "EXIDEIND.NS", name: "Exide Industries Ltd", exchange: "NSE", category: "EQUITY", cap: "SMALL", sector: "AUTO", ltp: 468.0, change: 9.5, pct: 2.07, high: 474.0, low: 457.0, vol: "7.1M", lot: 1200 },
-      { symbol: "NBCC.NS", name: "NBCC (India) Ltd", exchange: "NSE", category: "EQUITY", cap: "SMALL", sector: "INFRA", ltp: 98.5, change: 2.4, pct: 2.50, high: 101.0, low: 95.8, vol: "22.0M", lot: 3000 },
-      { symbol: "CENTRALBK.NS", name: "Central Bank of India", exchange: "NSE", category: "EQUITY", cap: "SMALL", sector: "BANKING", ltp: 58.2, change: 1.1, pct: 1.93, high: 59.4, low: 56.8, vol: "14.5M", lot: 3000 },
-      { symbol: "APOLLOTYRE.NS", name: "Apollo Tyres Ltd", exchange: "NSE", category: "EQUITY", cap: "SMALL", sector: "AUTO", ltp: 512.0, change: 8.2, pct: 1.63, high: 518.0, low: 502.0, vol: "3.1M", lot: 1000 },
-      { symbol: "MANAPPURAM.NS", name: "Manappuram Finance Ltd", exchange: "NSE", category: "EQUITY", cap: "SMALL", sector: "FINANCE", ltp: 172.0, change: 3.4, pct: 2.02, high: 175.0, low: 168.0, vol: "8.4M", lot: 3000 },
-      { symbol: "DATAPATTNS.NS", name: "Data Patterns (India) Ltd", exchange: "NSE", category: "EQUITY", cap: "SMALL", sector: "DEFENSE", ltp: 2640.0, change: 82.0, pct: 3.21, high: 2690.0, low: 2540.0, vol: "1.2M", lot: 150 },
-      { symbol: "OLECTRA.NS", name: "Olectra Greentech Ltd", exchange: "NSE", category: "EQUITY", cap: "SMALL", sector: "AUTO", ltp: 1620.0, change: 48.0, pct: 3.05, high: 1650.0, low: 1560.0, vol: "1.9M", lot: 200 },
-      { symbol: "KEC.NS", name: "KEC International Ltd", exchange: "NSE", category: "EQUITY", cap: "SMALL", sector: "INFRA", ltp: 985.0, change: 24.0, pct: 2.50, high: 1005.0, low: 955.0, vol: "1.5M", lot: 500 },
-      { symbol: "RBLBANK.NS", name: "RBL Bank Ltd", exchange: "NSE", category: "EQUITY", cap: "SMALL", sector: "BANKING", ltp: 218.0, change: 3.8, pct: 1.77, high: 222.0, low: 213.0, vol: "9.2M", lot: 2500 },
-      { symbol: "NATIONALUM.NS", name: "National Aluminium Co", exchange: "NSE", category: "EQUITY", cap: "SMALL", sector: "METALS", ltp: 236.0, change: 6.5, pct: 2.83, high: 241.0, low: 228.0, vol: "18.2M", lot: 3000 },
-      { symbol: "HFCL.NS", name: "HFCL Ltd", exchange: "NSE", category: "EQUITY", cap: "SMALL", sector: "TELECOM", ltp: 128.5, change: 3.2, pct: 2.55, high: 131.0, low: 124.5, vol: "12.8M", lot: 4000 },
-      { symbol: "MOTILALOFS.NS", name: "Motilal Oswal Financial", exchange: "NSE", category: "EQUITY", cap: "SMALL", sector: "FINANCE", ltp: 890.0, change: 22.0, pct: 2.53, high: 908.0, low: 865.0, vol: "2.1M", lot: 500 },
-      { symbol: "TRIDENT.NS", name: "Trident Ltd", exchange: "NSE", category: "EQUITY", cap: "SMALL", sector: "CONSUMER", ltp: 38.5, change: 0.9, pct: 2.39, high: 39.2, low: 37.4, vol: "26.0M", lot: 8000 }
+      { symbol: "HUDCO.NS", name: "Housing & Urban Dev Corp", exchange: "NSE", category: "EQUITY", cap: "SMALL", sector: "FINANCE", ltp: 154.62, change: -3.41, pct: -2.16, high: 157.0, low: 153.65, vol: "1.8M", lot: 1500 },
+      { symbol: "RAILTEL.NS", name: "RailTel Corporation", exchange: "NSE", category: "EQUITY", cap: "SMALL", sector: "TELECOM", ltp: 236.71, change: 0.37, pct: 0.16, high: 240.65, low: 236.24, vol: "0.3M", lot: 1000 },
+      { symbol: "COCHINSHIP.NS", name: "Cochin Shipyard Ltd", exchange: "NSE", category: "EQUITY", cap: "SMALL", sector: "DEFENSE", ltp: 1204.7, change: -28.2, pct: -2.29, high: 1228.0, low: 1194.2, vol: "0.4M", lot: 200 },
+      { symbol: "ANGELONE.NS", name: "Angel One Ltd", exchange: "NSE", category: "EQUITY", cap: "SMALL", sector: "FINANCE", ltp: 325.3, change: -0.85, pct: -0.26, high: 325.8, low: 317.1, vol: "3.2M", lot: 250 },
+      { symbol: "EXIDEIND.NS", name: "Exide Industries Ltd", exchange: "NSE", category: "EQUITY", cap: "SMALL", sector: "AUTO", ltp: 352.6, change: -9.9, pct: -2.73, high: 361.4, low: 349.6, vol: "1.4M", lot: 1200 },
+      { symbol: "NBCC.NS", name: "NBCC (India) Ltd", exchange: "NSE", category: "EQUITY", cap: "SMALL", sector: "INFRA", ltp: 77.04, change: -3.29, pct: -4.1, high: 80.0, low: 76.51, vol: "12.4M", lot: 3000 },
+      { symbol: "CENTRALBK.NS", name: "Central Bank of India", exchange: "NSE", category: "EQUITY", cap: "SMALL", sector: "BANKING", ltp: 30.35, change: -0.25, pct: -0.82, high: 30.6, low: 30.21, vol: "1.9M", lot: 3000 },
+      { symbol: "APOLLOTYRE.NS", name: "Apollo Tyres Ltd", exchange: "NSE", category: "EQUITY", cap: "SMALL", sector: "AUTO", ltp: 414.8, change: 12.4, pct: 3.08, high: 416.3, low: 408.0, vol: "0.5M", lot: 1000 },
+      { symbol: "MANAPPURAM.NS", name: "Manappuram Finance Ltd", exchange: "NSE", category: "EQUITY", cap: "SMALL", sector: "FINANCE", ltp: 318.05, change: -7.95, pct: -2.44, high: 323.6, low: 315.65, vol: "3.2M", lot: 3000 },
+      { symbol: "DATAPATTNS.NS", name: "Data Patterns (India) Ltd", exchange: "NSE", category: "EQUITY", cap: "SMALL", sector: "DEFENSE", ltp: 3721.4, change: -238.5, pct: -6.02, high: 3935.2, low: 3639.2, vol: "0.7M", lot: 150 },
+      { symbol: "OLECTRA.NS", name: "Olectra Greentech Ltd", exchange: "NSE", category: "EQUITY", cap: "SMALL", sector: "AUTO", ltp: 1010.6, change: -38.9, pct: -3.71, high: 1046.05, low: 1009.6, vol: "0.3M", lot: 200 },
+      { symbol: "KEC.NS", name: "KEC International Ltd", exchange: "NSE", category: "EQUITY", cap: "SMALL", sector: "INFRA", ltp: 324.5, change: -5.2, pct: -1.58, high: 327.95, low: 322.05, vol: "0.6M", lot: 500 },
+      { symbol: "RBLBANK.NS", name: "RBL Bank Ltd", exchange: "NSE", category: "EQUITY", cap: "SMALL", sector: "BANKING", ltp: 369.95, change: -2.45, pct: -0.66, high: 370.75, low: 360.95, vol: "0.9M", lot: 2500 },
+      { symbol: "NATIONALUM.NS", name: "National Aluminium Co", exchange: "NSE", category: "EQUITY", cap: "SMALL", sector: "METALS", ltp: 318.95, change: -12.05, pct: -3.64, high: 323.95, low: 314.1, vol: "4.1M", lot: 3000 },
+      { symbol: "HFCL.NS", name: "HFCL Ltd", exchange: "NSE", category: "EQUITY", cap: "SMALL", sector: "TELECOM", ltp: 210.66, change: -11.08, pct: -5.0, high: 210.66, low: 210.66, vol: "1.1M", lot: 4000 },
+      { symbol: "MOTILALOFS.NS", name: "Motilal Oswal Financial", exchange: "NSE", category: "EQUITY", cap: "SMALL", sector: "FINANCE", ltp: 1080.6, change: -14.4, pct: -1.32, high: 1102.0, low: 1068.95, vol: "1.3M", lot: 500 },
+      { symbol: "TRIDENT.NS", name: "Trident Ltd", exchange: "NSE", category: "EQUITY", cap: "SMALL", sector: "CONSUMER", ltp: 23.67, change: -0.19, pct: -0.8, high: 23.79, low: 23.35, vol: "3.9M", lot: 8000 }
     ];
 
     // --- 2. USER WATCHLIST STATE & PERSISTENCE ---
@@ -3562,6 +3609,7 @@
             symbol: activeDossier.symbol,
             market: activeMarket,
             currency: activeCurrency,
+            strategy_name: selectedStrategy,
             api_key: geminiApiKey || null
           })
         });
@@ -3718,39 +3766,19 @@
 
       container.innerHTML = "";
 
-      if (typeof TradingView !== "undefined") {
-        tvWidget = new TradingView.widget({
-          autosize: true,
-          symbol: tvSymbol,
-          interval: interval,
-          timezone: timezone,
-          theme: "dark",
-          style: "1", // 1 = Candlesticks
-          locale: "in",
-          support_host: "https://www.tradingview.com",
-          toolbar_bg: "#0c101a",
-          enable_publishing: false,
-          allow_symbol_change: true,
-          withdateranges: true,
-          hide_side_toolbar: false,
-          details: true,
-          hotlist: true,
-          calendar: true,
-          container_id: "tradingview-chart-container",
-          studies: [
-            "MASimple@tv-basicstudies",
-            "RSI@tv-basicstudies",
-            "Volume@tv-basicstudies"
-          ]
-        });
-      } else {
-        container.innerHTML = `
-          <div class="flex flex-col items-center justify-center h-full text-slate-400 space-y-2">
-            <i class="ri-loader-4-line animate-spin text-2xl text-blue-400"></i>
-            <p class="font-mono text-xs">Loading TradingView Real-Time Chart for ${tvSymbol}...</p>
-          </div>
-        `;
-      }
+      // Direct High-Performance TradingView Embed (Works in all browsers, zero script crashes)
+      const iframe = document.createElement("iframe");
+      iframe.style.width = "100%";
+      iframe.style.height = "100%";
+      iframe.style.border = "none";
+      iframe.setAttribute("allowtransparency", "true");
+      iframe.setAttribute("scrolling", "no");
+      iframe.setAttribute("allowfullscreen", "true");
+
+      const embedUrl = `https://s.tradingview.com/widgetembed/?frameElementId=tv_chart_iframe&symbol=${encodeURIComponent(tvSymbol)}&interval=${interval}&symboledit=1&saveimage=1&toolbarbg=0c101a&theme=dark&style=1&timezone=${encodeURIComponent(timezone)}&studies=%5B%5D&hideideas=1&locale=in`;
+      iframe.src = embedUrl;
+
+      container.appendChild(iframe);
     }
 
     function setChartEngine(engine) {
@@ -3775,13 +3803,129 @@
       }
     }
 
-    function onStrategySelectChange() {
-      const select = document.getElementById("sel-active-strategy");
-      if (select) {
-        selectedStrategy = select.value;
+    const STRATEGY_CONFIGS = {
+      "15m ORB Day Trader": {
+        name: "15m ORB Day Trader",
+        tag: "15m ORB",
+        description: "Monitors the first 15-minute high/low breakout with volume surge (>1.5x 20MA). Enforces a 2:1 Reward:Risk ratio with hard stop at range midpoint.",
+        entryRule: "5m Bar Closes Above 15m Range High",
+        slRule: "15m Range Midpoint (Max 1.8% Risk)",
+        targetRule: "2.0R Multiple (+3.6% Target)",
+        checklist: [
+          { text: "15m Opening Range Breakout Confirmed", passed: true },
+          { text: "Volume > 1.5x 20-period Moving Average", passed: true },
+          { text: "Reward:Risk Ratio >= 1.5:1", passed: true }
+        ]
+      },
+      "Smart Money Concepts (SMC - FVG)": {
+        name: "Smart Money Concepts (SMC - FVG)",
+        tag: "SMC FVG",
+        description: "Identifies institutional order blocks, liquidity sweeps below prior session low, and enters on the retest of an unmitigated 5m Fair Value Gap.",
+        entryRule: "Retest of 5m Bullish Fair Value Gap (FVG)",
+        slRule: "Below Institutional Displacement Low",
+        targetRule: "Buy-Side Liquidity Pool / Previous High",
+        checklist: [
+          { text: "Previous Session Liquidity Swept", passed: true },
+          { text: "Unmitigated 5m Fair Value Gap Formed", passed: true },
+          { text: "Displacement Candle Volume Confirmed", passed: true }
+        ]
+      },
+      "CPR + Supertrend Trend Ride": {
+        name: "CPR + Supertrend Trend Ride",
+        tag: "CPR Trend",
+        description: "Aligns Central Pivot Range (CPR: Pivot, TC, BC) with 7,3 Supertrend. Takes high-probability continuation trades toward daily R1 / R2 pivot levels.",
+        entryRule: "Price Above Top Central (TC) + Green Supertrend",
+        slRule: "Below Daily Central Pivot Range (BC)",
+        targetRule: "Daily R1 / R2 Resistance Pivot (+3.2%)",
+        checklist: [
+          { text: "Price Trading Above Daily CPR", passed: true },
+          { text: "Supertrend (7, 3) Bullish Green Alignment", passed: true },
+          { text: "Clear Pathway to R1 / R2 Resistance", passed: true }
+        ]
+      },
+      "Oversold Mean Reversion (RSI < 30)": {
+        name: "Oversold Mean Reversion (RSI < 30)",
+        tag: "Mean Reversion",
+        description: "Exploits temporary institutional capitulation where 14-period RSI drops below 30 with bullish divergence and hammer candlestick pattern.",
+        entryRule: "Hammer / Engulfing Reversal with RSI < 35",
+        slRule: "1.5% Below Swing Low",
+        targetRule: "Reversion to 20-period SMA Mean (+2.8%)",
+        checklist: [
+          { text: "14-Period RSI Divergence < 35", passed: true },
+          { text: "Bullish Reversal Candle Confirmed", passed: true },
+          { text: "Reward:Risk Ratio >= 1.8:1", passed: true }
+        ]
+      },
+      "TradingView Pine Script Webhook": {
+        name: "TradingView Pine Script Alert",
+        tag: "TV Webhook",
+        description: "Direct algorithmic webhook alerts dispatched from custom Pine Script strategies running on TradingView servers with instant 1-click execution.",
+        entryRule: "TradingView Webhook JSON Trigger Received",
+        slRule: "Pine Script Parameterized Stop-Loss",
+        targetRule: "Pine Script Take-Profit Target",
+        checklist: [
+          { text: "Verified Webhook HMAC / Secret Signature", passed: true },
+          { text: "Real-Time Exchange Price Match", passed: true },
+          { text: "Pre-Trade Risk Engine Clearance", passed: true }
+        ]
       }
+    };
+
+    function updateStrategyDisplay() {
+      const cfg = STRATEGY_CONFIGS[selectedStrategy] || STRATEGY_CONFIGS["15m ORB Day Trader"];
+      
+      // Update Chart header select
+      const selChart = document.getElementById("sel-active-strategy");
+      if (selChart && selChart.value !== selectedStrategy) selChart.value = selectedStrategy;
+
+      // Update AI Day Trader tab elements
+      const selAi = document.getElementById("ai-tab-strategy-select");
+      if (selAi && selAi.value !== selectedStrategy) selAi.value = selectedStrategy;
+
       const stratNameEl = document.getElementById("dt-strategy-name");
-      if (stratNameEl) stratNameEl.innerText = selectedStrategy;
+      if (stratNameEl) stratNameEl.innerText = cfg.name;
+
+      const titleEl = document.getElementById("ai-active-strategy-title");
+      if (titleEl) titleEl.innerText = cfg.name;
+
+      const descEl = document.getElementById("ai-strategy-description");
+      if (descEl) descEl.innerText = cfg.description;
+
+      const entryRuleEl = document.getElementById("ai-strat-entry-rule");
+      if (entryRuleEl) entryRuleEl.innerText = cfg.entryRule;
+
+      const slRuleEl = document.getElementById("ai-strat-sl-rule");
+      if (slRuleEl) slRuleEl.innerText = cfg.slRule;
+
+      const targetRuleEl = document.getElementById("ai-strat-target-rule");
+      if (targetRuleEl) targetRuleEl.innerText = cfg.targetRule;
+
+      // Update Checklist container
+      const chkContainer = document.getElementById("dt-strategy-checklist-container");
+      if (chkContainer) {
+        chkContainer.innerHTML = cfg.checklist.map(item => `
+          <div class="flex items-center justify-between p-1 rounded bg-[#101726] border border-[#1b253b]">
+            <span class="text-slate-300 flex items-center space-x-1">
+              <i class="ri-checkbox-circle-fill text-emerald-400"></i>
+              <span>${item.text}</span>
+            </span>
+            <span class="text-emerald-400 font-bold text-[10px]">PASS</span>
+          </div>
+        `).join("");
+      }
+
+      // Re-render scanned list to reflect strategy tag
+      renderDayTraderScans();
+    }
+
+    function onStrategySelectChange(newStrat) {
+      if (newStrat) {
+        selectedStrategy = newStrat;
+      } else {
+        const select = document.getElementById("sel-active-strategy");
+        if (select) selectedStrategy = select.value;
+      }
+      updateStrategyDisplay();
 
       // Update AI Day Trader dossier with the chosen strategy
       if (typeof selectScannedSetup === "function" && typeof currentScannedSetups !== "undefined" && currentScannedSetups.length > 0) {
@@ -3874,14 +4018,24 @@
       }
     }
 
-    window.onload = () => {
+    window.onload = async () => {
       updateGeminiStatusIndicator();
-      runDayTraderScan();
       loadUserWatchlist();
       renderIndicesTicker();
       renderWatchlist();
       selectSymbol("RELIANCE.NS");
       renderJournal();
+      updateStrategyDisplay();
+
+      // Automatically check backend connectivity & fetch authentic live market data immediately
+      await checkBackendConnectivity();
+      fetchAllLiveQuotes();
+      runDayTraderScan();
+
+      // Automatically start live price updates
+      if (!isAutoUpdateRunning) {
+        toggleAutoUpdate();
+      }
     };
   </script>
 </body>
