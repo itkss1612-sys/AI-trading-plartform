@@ -312,7 +312,7 @@
             <!-- Search Field -->
             <div class="relative">
               <i class="ri-search-line absolute left-2.5 top-2 text-slate-400 text-xs"></i>
-              <input type="text" id="search-watchlist" placeholder="Filter watchlist..." class="w-full bg-[#090d16] border border-terminal-border rounded pl-8 pr-2 py-1 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 transition" oninput="filterWatchlist()">
+              <input type="text" id="search-watchlist" placeholder="Filter or type any stock to fetch (Enter)..." onkeydown="if(event.key==='Enter' && this.value.trim()) quickFetchAnyStock(this.value)" class="w-full bg-[#090d16] border border-terminal-border rounded pl-8 pr-2 py-1 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 transition" oninput="filterWatchlist()">
             </div>
 
             <!-- Category Chips & Counter -->
@@ -344,11 +344,23 @@
             <!-- Chart Toolbar -->
             <div class="flex flex-wrap items-center justify-between px-3 py-1.5 bg-[#111726] border-b border-terminal-border text-xs gap-1.5">
               
-              <!-- Symbol & Timeframes -->
-              <div class="flex items-center space-x-2">
-                <span id="active-symbol-badge" class="font-bold text-white px-2 py-0.5 rounded bg-blue-900/40 border border-blue-500/40 tracking-wide font-mono">
+              <!-- Symbol & Universal Stock Search (Any Penny to Large Cap) -->
+              <div class="flex items-center space-x-2 flex-wrap gap-y-1">
+                <span id="active-symbol-badge" class="font-bold text-white px-2 py-0.5 rounded bg-blue-900/40 border border-blue-500/40 tracking-wide font-mono text-xs">
                   RELIANCE.NS
                 </span>
+
+                <!-- Quick Universal Ticker Search Input -->
+                <div class="flex items-center bg-[#090d16] border border-blue-900/60 rounded px-1.5 py-0.5 shadow-inner">
+                  <i class="ri-search-2-line text-slate-400 text-xs mr-1"></i>
+                  <input type="text" id="top-symbol-search" placeholder="Type ANY Stock (e.g. URJA, IDEA, HCC)..."
+                    onkeydown="if(event.key==='Enter') quickFetchAnyStock(this.value)"
+                    class="bg-transparent text-white text-[11px] placeholder-slate-500 font-mono focus:outline-none w-32 sm:w-44 uppercase" />
+                  <button type="button" onclick="quickFetchAnyStock(document.getElementById('top-symbol-search').value)" 
+                    class="px-2 py-0.5 rounded bg-blue-600 hover:bg-blue-500 text-white font-mono text-[10px] font-bold transition cursor-pointer">
+                    FETCH
+                  </button>
+                </div>
 
                 <div class="flex items-center bg-[#090d16] rounded border border-terminal-border p-0.5">
                   <button onclick="setTimeframe('1m')" class="tf-btn px-2 py-0.5 rounded font-mono text-[11px] text-slate-400 hover:text-white">1M</button>
@@ -2471,12 +2483,19 @@
 
       if (filtered.length === 0) {
         container.innerHTML = `
-          <div class="p-6 text-center text-slate-500 space-y-2">
-            <i class="ri-search-eye-line text-2xl text-slate-600"></i>
-            <p>No matching stocks found.</p>
-            <button onclick="openAddStockModal()" class="px-2.5 py-1 rounded bg-blue-600 hover:bg-blue-500 text-white font-bold text-[10px] mt-1">
-              + Add Stocks to Watchlist
-            </button>
+          <div class="p-6 text-center text-slate-400 space-y-2.5">
+            <i class="ri-radar-line text-2xl text-blue-400"></i>
+            <p class="text-xs text-slate-300 font-semibold">${q ? `"${q.toUpperCase()}" not in current list` : 'No stocks found.'}</p>
+            ${q ? `
+              <button onclick="quickFetchAnyStock('${q}')" class="px-3 py-1.5 rounded bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[11px] shadow flex items-center justify-center space-x-1 mx-auto cursor-pointer transition">
+                <i class="ri-download-cloud-2-line"></i>
+                <span>Fetch & Add "${q.toUpperCase()}" Live</span>
+              </button>
+            ` : `
+              <button onclick="openAddStockModal()" class="px-2.5 py-1 rounded bg-blue-600 hover:bg-blue-500 text-white font-bold text-[10px] mt-1 cursor-pointer">
+                + Browse / Add Stocks
+              </button>
+            `}
           </div>
         `;
         return;
@@ -2665,7 +2684,7 @@
 
         // Instantly query true live quote from backend or Yahoo Finance
         try {
-          const res = await fetch(http://127.0.0.1:8000/api/v1/market/quote?symbol=);
+          const res = await fetch("http://127.0.0.1:8000/api/v1/market/quote?symbol=" + encodeURIComponent(sym));
           if (res.ok) {
             const qData = await res.json();
             newItem.name = qData.name || newItem.name;
@@ -4288,7 +4307,9 @@
         setPlannerDirection('SHORT');
       }
       calculateRisk();
-      alert(`✓ Applied measured levels to Position Planner: Entry ₹${p1}, Target ₹${p2}`);
+      // Non-blocking UI update
+      const tag = document.getElementById("small-stock-tag");
+      if (tag) tag.innerText = `Measured: ₹${p1} -> ₹${p2}`;
     }
 
     function setFixedQty(qty) {
@@ -4314,10 +4335,107 @@
       if (resRiskAmt) resRiskAmt.innerText = `₹${riskAmt.toLocaleString()}`;
       if (tag) tag.innerText = `₹${profitAmt.toLocaleString()} Gain`;
 
-      alert(`Selected ${qty.toLocaleString()} shares of ${activeSymbol.replace('.NS','')}:
-• Capital: ₹${capitalNeeded.toLocaleString()}
-• Potential Profit: +₹${profitAmt.toLocaleString()}
-• Stop Loss Risk: -₹${riskAmt.toLocaleString()}`);
+      // Smooth non-blocking UI update (No jamming popup)
+      if (tag) {
+        tag.innerText = `₹${profitAmt.toLocaleString()} Gain (₹${capitalNeeded.toLocaleString()} Cap)`;
+        tag.className = "text-[9px] text-emerald-400 font-bold";
+      }
+    }
+
+    
+    // =========================================================================
+    // UNIVERSAL STOCK FETCHER (ANY PENNY STOCK TO LARGE CAP STOCK)
+    // =========================================================================
+    async function quickFetchAnyStock(query) {
+      if (!query || !query.trim()) return;
+      let raw = query.trim().toUpperCase();
+      let sym = raw;
+      if (!sym.startsWith('^') && !sym.endsWith('.NS') && !sym.endsWith('.BO')) {
+        sym = sym + '.NS';
+      }
+
+      // Check if already in active userWatchlist
+      const exists = userWatchlist.find(w => w.symbol === sym);
+      if (exists) {
+        selectSymbol(sym);
+        const topInp = document.getElementById('top-symbol-search');
+        if (topInp) topInp.value = '';
+        const wlInp = document.getElementById('search-watchlist');
+        if (wlInp) wlInp.value = '';
+        renderWatchlist();
+        return;
+      }
+
+      // Check in master directory
+      const inMaster = NSE_MASTER_DIRECTORY.find(m => m.symbol === sym);
+      if (inMaster) {
+        userWatchlist.unshift({ ...inMaster });
+        saveUserWatchlist();
+        renderWatchlist();
+        selectSymbol(sym);
+        const topInp = document.getElementById('top-symbol-search');
+        if (topInp) topInp.value = '';
+        return;
+      }
+
+      // Fetch authentic live quote from FastAPI backend
+      try {
+        const res = await fetch("http://127.0.0.1:8000/api/v1/market/quote?symbol=" + encodeURIComponent(sym));
+        if (res.ok) {
+          const q = await res.json();
+          const ltpVal = Number(q.last_price) || 20.0;
+          const capTag = ltpVal < 50 ? 'PENNY' : (ltpVal <= 500 ? 'SMALL' : 'LARGE');
+          const newItem = {
+            symbol: sym,
+            name: q.name || raw + ' Ltd',
+            exchange: q.exchange || 'NSE',
+            category: sym.startsWith('^') ? 'INDEX' : 'EQUITY',
+            cap: capTag,
+            sector: capTag,
+            ltp: ltpVal,
+            change: q.change || 0,
+            pct: q.change_pct || 0,
+            high: q.high || ltpVal,
+            low: q.low || ltpVal,
+            vol: q.volume ? (q.volume / 1e6).toFixed(1) + 'M' : '1.0M',
+            lot: 1
+          };
+          NSE_MASTER_DIRECTORY.unshift(newItem);
+          userWatchlist.unshift(newItem);
+          saveUserWatchlist();
+          renderWatchlist();
+          selectSymbol(sym);
+          const topInp = document.getElementById('top-symbol-search');
+          if (topInp) topInp.value = '';
+          const wlInp = document.getElementById('search-watchlist');
+          if (wlInp) wlInp.value = '';
+          return;
+        }
+      } catch (e) {
+        console.warn("Live lookup failed, creating fallback entry:", e);
+      }
+
+      // Fallback create entry
+      const fallbackItem = {
+        symbol: sym,
+        name: raw + ' Ltd',
+        exchange: 'NSE',
+        category: 'EQUITY',
+        cap: 'EQUITY',
+        sector: 'EQUITY',
+        ltp: 20.0,
+        change: 0,
+        pct: 0,
+        high: 20.0,
+        low: 20.0,
+        vol: '1.0M',
+        lot: 1
+      };
+      NSE_MASTER_DIRECTORY.unshift(fallbackItem);
+      userWatchlist.unshift(fallbackItem);
+      saveUserWatchlist();
+      renderWatchlist();
+      selectSymbol(sym);
     }
 
     function setChartEngine(engine) {
@@ -4568,7 +4686,7 @@
 
       // Automatically check backend connectivity & fetch authentic live market data immediately
       await checkBackendConnectivity();
-      fetchAllLiveQuotes();
+      fetchAllStockQuotes();
       runDayTraderScan();
 
       // Automatically start live price updates
